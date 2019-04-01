@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle jolie-language-client",
+        "command": "jolie-language-client:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "jolie-language-client",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "jolie-language-client:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
