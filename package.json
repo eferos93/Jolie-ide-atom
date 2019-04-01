@@ -1,6 +1,6 @@
 {
   "name": "jolie-language-client",
-  "main": "./lib/jolie-language-client",
+  "main": "./lib/main.js",
   "version": "0.0.0",
   "description": "Jolie Language support for Atom IDE",
   "keywords": [
