@@ -11,7 +11,7 @@ inputPort Input {
 
 main {
   check(req)(res) {
-    println@Console("connessione avvenuta")()
+    println@Console("connessione avvenuta")();
     res = "Conn avvenuta"
   }
 }
