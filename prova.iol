@@ -1,3 +1,3 @@
-interface interfaceName {
+interface Prova {
 RequestResponse: check(undefined)(undefined)
 }

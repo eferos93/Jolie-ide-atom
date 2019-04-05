@@ -1,0 +1,4 @@
+jolie.InterpreterException: Error: the interpretation environment couldn't have been initialized
+	at jolie.Interpreter.init(Interpreter.java:1054)
+	at jolie.Interpreter.run(Interpreter.java:1139)
+	at jolie.Jolie.main(Jolie.java:60)
