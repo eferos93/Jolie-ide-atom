@@ -1,21 +1,22 @@
 include "console.iol"
 include "prova.iol"
-include "ui/swing_ui.iol"
 include "json_utils.iol"
 include "exec.iol"
 
 execution{ concurrent }
 
 inputPort Input {
-  Location: "socket://localhost:8090"
+  Location: Location_JolieLS
   Protocol: jsonrpc { .debug = true }
   Interfaces: Prova
 }
 
+init {
+  println@Console("Started")()
+}
+
 main {
-  check(req)(res) {
-    println@Console("connessione avvenuta")();
-    showMessageDialog@SwingUI("conn avvenuta")();
-    res = "Conn avvenuta"
+  initialize(req)(res) {
+    println@Console("connessione avvenuta"+ response)()
   }
 }

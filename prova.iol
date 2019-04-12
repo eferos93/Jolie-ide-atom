@@ -1,3 +1,3 @@
 interface Prova {
-RequestResponse: check(undefined)(undefined)
+RequestResponse: initialize(undefined)(undefined)
 }
