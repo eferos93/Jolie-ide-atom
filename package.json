@@ -4,10 +4,14 @@
   "version": "0.0.0",
   "description": "Jolie Language support for Atom IDE",
   "keywords": [
+    "jolie",
+    "completion",
+    "lsp"
   ],
-  "activationCommands": {
-    "atom-workspace": "jolie-language-client:toggle"
-  },
+  "activationEvents": [
+    "onLanguage:jolie"
+  ],
+  "categories": ["Programming Languages"],
   "repository": "https://github.com/atom/jolie-language-client",
   "license": "MIT",
   "engines": {
