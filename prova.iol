@@ -1,3 +1,4 @@
-interface interfaceName {
-RequestResponse: check(undefined)(undefined)
+interface Prova {
+RequestResponse: initialize
+                 
 }
