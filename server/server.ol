@@ -20,7 +20,7 @@ main {
     with( serverCapabilities.capabilities ) {
       .textDocumentSync = 2;
       with( .completionProvider ) {
-        .resolveProvider = false;
+        .resolveProvider = true;
         .triggerCharacters[0] = "=";
         .triggerCharacters[1] = "."
         //.triggerCharacters[2] = "A-Za-z0-9";
@@ -45,7 +45,7 @@ main {
       .declarationProvider = false;
       //.executeCommandProvider;
       with( .workspace.workspaceFolders ) {
-        .supported = false;
+        .supported = true;
         .changeNotifications = true
       }
       //.experimental;

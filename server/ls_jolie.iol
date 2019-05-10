@@ -15,7 +15,7 @@ interface TextDocumentInterface {
     didChange,
     willSave,
     didSave,
-    didClose,
+    didClose
      //server -> client
   RequestResponse:
     willSaveWaitUntil,
@@ -25,5 +25,10 @@ interface TextDocumentInterface {
 
 interface WorkspaceInterface {
   OneWay:
-    didChangeWatchedFiles
+    didChangeWatchedFiles,
+    didChangeWorkspaceFolders,
+    didChangeConfiguration
+  RequestResponse:
+    symbol,
+    executeCommand
 }
