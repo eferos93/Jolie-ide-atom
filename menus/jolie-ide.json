@@ -2,8 +2,8 @@
   "context-menu": {
     "atom-text-editor": [
       {
-        "label": "Toggle jolie-language-client",
-        "command": "jolie-language-client:toggle"
+        "label": "Toggle jolie-ide",
+        "command": "jolie-ide:toggle"
       }
     ]
   },
@@ -12,11 +12,11 @@
       "label": "Packages",
       "submenu": [
         {
-          "label": "jolie-language-client",
+          "label": "jolie-ide",
           "submenu": [
             {
               "label": "Toggle",
-              "command": "jolie-language-client:toggle"
+              "command": "jolie-ide:toggle"
             }
           ]
         }
