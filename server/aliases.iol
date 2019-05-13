@@ -1,4 +1,4 @@
-
+include "types.iol"
 include "ls_jolie.iol"
 
 outputPort TextDocument {
@@ -16,7 +16,7 @@ embedded {
 inputPort Input {
   //Location: "socket://localhost:8080"
   Location: Location_JolieLS
-  Protocol: jsonrpc { .debug = true;
+  Protocol: jsonrpc { //.debug = true;
                       .transport="lsp";
                       .osc.onExit.alias = "exit";
                       .osc.cancelRequest.alias = "$/cancelRequest";
@@ -33,5 +33,5 @@ inputPort Input {
                       .osc.executeCommand.alias = "workspace/executeCommand"
                       }
   Interfaces: GeneralInterface
-  Aggregates: TextDocument
+  Aggregates: TextDocument, Workspace
 }

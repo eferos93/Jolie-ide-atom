@@ -3,7 +3,6 @@ interface GeneralInterface {
     initialized,
     onExit,
     cancelRequest
-
   RequestResponse:
     initialize,
     shutdown
@@ -16,11 +15,9 @@ interface TextDocumentInterface {
     willSave,
     didSave,
     didClose
-     //server -> client
   RequestResponse:
     willSaveWaitUntil,
-    completion,
-    publishDiagnostics
+    completion
 }
 
 interface WorkspaceInterface {

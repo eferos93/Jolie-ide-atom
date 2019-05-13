@@ -9,7 +9,9 @@
     "lsp"
   ],
   "activationEvents": [
-    "onLanguage:jolie"
+    "onLanguage:jolie",
+    "workspaceContains:**/*.ol",
+    "workspaceContains:**/*.iol"
   ],
   "categories": ["Programming Languages"],
   "repository": "https://github.com/atom/jolie-language-client",
