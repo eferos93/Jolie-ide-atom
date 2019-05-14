@@ -4,8 +4,13 @@ type InitializeParams: void {
   .rootUri: DocumentUri | void
   .initializationOptions?: undefined
   .capabilities: ClientCapabilities
-  .trace?: "off" | "messages" | "verbose"
+  .trace?: string // "off" | "messages" | "verbose"
   .workspaceFolders*: WorkspaceFolder | void
+}
+
+type WorkspaceFolder: void {
+  .uri: string
+  .name: string
 }
 
 type DocumentUri: string
@@ -42,7 +47,7 @@ type WorkspaceClientCapabilities: void {
   .configuration?: bool
 }
 
-type ResourceOperationsKind: string //namespace
+type ResourceOperationKind: string //namespace
 type FailureHandlingKind: string //namespace
 type MarkupKind: string //namespace
 type SymbolKind: int //namespace
@@ -50,7 +55,7 @@ type CompletionItemKind: int // namespace
 type CodeActionKind: string //namespace
 
 type TextDocumentClientCapabilities: void {
-  .synchronization?: {
+  .synchronization?: void {
     .dynamicRegistration?: bool
     .willSave?: bool
     .willSaveUntil?: bool
@@ -118,7 +123,7 @@ type TextDocumentClientCapabilities: void {
     .linkSupport?: bool
   }
   .implementation?: void {
-    .dynamicRegistration:? bool
+    .dynamicRegistration?: bool
     .linkSupport?: bool
   }
   .codeAction?: void {
@@ -154,26 +159,26 @@ type InitializeResult: void {
 }
 
 type ServerCapabilities: void {
-  .textDocumentSync?: TextDocumentSyncOptions | int //do
+  .textDocumentSync?: TextDocumentSyncOptions | int
   .hoverProvider?: bool
-  .completionProvider?: CompletionOptions //do
-  .signatureHelpProvider?: SignatureHelpProvider //do
+  .completionProvider?: CompletionOptions
+  .signatureHelpProvider?: SignatureHelpOptions
   .definitionProvider?: bool
-  .typeDefinitionProvider?: bool //do vedi specifiche
-  .implementationProvider?: bool //do vedi specifiche
-  .referenceProvider?: bool //do see specification
+  .typeDefinitionProvider?: undefined //do vedi specifiche
+  .implementationProvider?: undefined //do vedi specifiche
+  .referenceProvider?: undefined //do see specification
   .documentHighlightProvider?: bool
   .documentSymbolProvider?: bool
-  .codeActionProvider?: CodeLensOptions //do
+  .codeActionProvider?: CodeLensOptions
   .documentFormattingProvider?: bool
   .documentRangeFormattingProvider?: bool
-  .documentOnTypeFormattingProvider?: DocumentOnTypeFormattingOptions //do
-  .renameProvider?: bool | RenameOptions //do
-  .documentLinkProvider?: DocumentLinkOptions //do
-  .colorProvider?: bool | ColorProviderOptions //do see specification
-  .foldingRangeProvider?: bool | FoldingRangeProviderOptions //do see specification
-  .declarationProvider?: bool //see specification
-  .executeCommandProvider?: ExecuteCommandOptions //do
+  .documentOnTypeFormattingProvider?: DocumentOnTypeFormattingOptions
+  .renameProvider?: bool | RenameOptions
+  .documentLinkProvider?: DocumentLinkOptions
+  .colorProvider?: undefined //do see specification
+  .foldingRangeProvider?: undefined //do see specification
+  .declarationProvider?: undefined //see specification
+  .executeCommandProvider?: ExecuteCommandOptions
   .workspace?: void {
     .workspaceFolders?: void {
       .supported?: bool
@@ -181,4 +186,94 @@ type ServerCapabilities: void {
     }
   }
   .experimental?: undefined
+}
+
+type ExecuteCommandOptions: void {
+  /**
+   * The commands to be executed on the server
+   */
+  .commands[1,*]: string
+}
+
+type DocumentLinkOptions: void {
+  /**
+	 * Document links have a resolve provider as well.
+	 */
+	.resolveProvider?: bool
+}
+
+type RenameOptions: void {
+  /**
+   * Renames should be checked and tested before being executed.
+   */
+  .prepareProvider?: bool
+}
+
+type DocumentOnTypeFormattingOptions: void {
+  /**
+   * A character on which formatting should be triggered, like `}`.
+   */
+  .firstTriggerCharacter: string
+  /**
+   * More trigger characters.
+   */
+  .moreTriggerCharacter*: string
+}
+
+type CodeLensOptions: void {
+  /**
+	 * Code lens has a resolve provider as well.
+	 */
+   .resolveProvider?: bool
+}
+type SignatureHelpOptions: void {
+  /**
+   * The characters that trigger signature help
+   * automatically.
+   */
+  .triggerCharacters*: string
+}
+
+type CompletionOptions: void {
+  /**
+	 * The server provides support to resolve additional
+	 * information for a completion item.
+	 */
+   .resolveProvider?: bool
+	/**
+	 * The characters that trigger completion automatically.
+	 */
+   .triggerCharacters*: string
+}
+
+type TextDocumentSyncOptions: void {
+  /**
+	 * Open and close notifications are sent to the server. If omitted open close notification should not
+	 * be sent.
+	 */
+  .openClose?: bool
+  /**
+	 * Change notifications are sent to the server. See TextDocumentSyncKind.None, TextDocumentSyncKind.Full
+	 * and TextDocumentSyncKind.Incremental. If omitted it defaults to TextDocumentSyncKind.None.
+	 */
+  .change?: int
+  /**
+	 * If present will save notifications are sent to the server. If omitted the notification should not be
+	 * sent.
+	 */
+  .willSave?: bool
+	/**
+	 * If present will save wait until requests are sent to the server. If omitted the request should not be
+	 * sent.
+	 */
+	.willSaveWaitUntil?: bool
+	/**
+	 * If present save notifications are sent to the server. If omitted the notification should not be
+	 * sent.
+	 */
+  .save?: SaveOptions
+}
+
+type SaveOptions: void {
+  .includeText?: bool
 }

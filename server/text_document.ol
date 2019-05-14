@@ -14,17 +14,18 @@ inputPort TextDocumentInput {
 
 init {
   println@Console( "txtDoc running" )()
-  k -> global.keywords[#global.keywords];
-  k = "include";
-  k = "execution";
-  K = "inputPort";
-  k = "Interfaces";
-  k = "global";
-  k = "Protocol";
-  k = "OneWay";
-  k = "RequestResponse";
-  k = "type";
-  k = "define";
+  global.textDocument[0] = ""
+  k -> global.keywords[#global.keywords]
+  k = "include"
+  k = "execution"
+  K = "inputPort"
+  k = "Interfaces"
+  k = "global"
+  k = "Protocol"
+  k = "OneWay"
+  k = "RequestResponse"
+  k = "type"
+  k = "define"
   //TODO add all keywords
 }
 
@@ -37,11 +38,11 @@ main {
     for(i = 0, i < #docs && keepRun, i++) {
       if(doc.uri == uri && docs.version < newVersion) {
         docs[i] << notification.textDocument;
-        keepRun = false;
+        keepRun = false
       }
     }
 
-    if(keepRun) {
+    if( keepRun ) {
       docs[#doc+1] << notification.textDocument
     }
 
@@ -62,21 +63,21 @@ main {
   }
 
   [ didClose( notificantion ) ] {
-    uri -> notification.textDocument.uri;
-    docs -> global.textDocument;
-    keepRun = true;
+    uri -> notification.textDocument.uri
+    docs -> global.textDocument
+    keepRun = true
     for(i = 0, i < #docs && keepRun, i++) {
       if(docs[i].uri == uri) {
-        undef(docs[i]);
+        undef(docs[i])
         keepRun = false
       }
     }
   }
   [ completion( completionParams )( completionList ) {
-    textDoc = completionParams.textDocument;
-    position = completionParams.position;
-    line = position.line;
-    character = position.character;
+    textDoc = completionParams.textDocument
+    position = completionParams.position
+    line = position.line
+    character = position.character
     context = completionParams.context
   } ]
 

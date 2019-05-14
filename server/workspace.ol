@@ -21,8 +21,8 @@ main {
   }
 
   [ didChangeWorkspaceFolders( notification ) ] {
-    newFolders -> notification.event.added;
-    removedFolders -> notification.event.removed;
+    newFolders -> notification.event.added
+    removedFolders -> notification.event.removed
     for(i = 0, i<#newFolders, i++) {
       global.workspace.folders[#global.workspace.folders+(i+1)] = newFolders[i]
     }
@@ -36,22 +36,22 @@ main {
   }
 
   [ didChangeConfiguration( notification ) ] {
-      valueToPrettyString@StringUtils( notification )(res);
+      valueToPrettyString@StringUtils( notification )(res)
       println@Console("didChangeConfiguration received " + res)()
       //TODO
   }
 
   [ symbol( symbolRequest )( symbolResponse ) {
-      valueToPrettyString@StringUtils( symbolReq )(res);
+      valueToPrettyString@StringUtils( symbolReq )(res)
       println@Console( "symbolReq received " + res )()
       //TODO
   } ]
 
   [ executeCommand( commandParams )( commandResult ) {
-      cmd -> commandParams.commandParams;
-      args -> commandParams.arguments;
-      command = cmd;
-      command.args = args;
+      cmd -> commandParams.commandParams
+      args -> commandParams.arguments
+      command = cmd
+      command.args = args
       exec@Exec( command )( commandResult )
   }]
 }

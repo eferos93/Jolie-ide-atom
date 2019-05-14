@@ -8,23 +8,23 @@ include "aliases.iol"
 
 
 init {
-  println@Console("Jolie Language Server Started")();
+  println@Console("Jolie Language Server Started")()
   global.receivedShutdownReq = false
 }
 
 main {
   [ initialize( initializeParams )( serverCapabilities ) {
-    println@Console( "connessione avvenuta" )();
-    global.processId = initializeParams.processId;
-    global.rootUri = initializeParams.rootUri;
-    global.clientCapabilities << initializeParams.capabilities;
-    println@Console( "Process ID: " + global.processId )();
-    println@Console( "Root Uri: " + global.rootUri )();
+    println@Console( "connessione avvenuta" )()
+    global.processId = initializeParams.processId
+    global.rootUri = initializeParams.rootUri
+    global.clientCapabilities << initializeParams.capabilities
+    println@Console( "Process ID: " + global.processId )()
+    println@Console( "Root Uri: " + global.rootUri )()
     with( serverCapabilities.capabilities ) {
-      .textDocumentSync = 2;
+      .textDocumentSync = 2
       with( .completionProvider ) {
         //.resolveProvider = true;
-        .triggerCharacters[0] = "=";
+        .triggerCharacters[0] = "="
         .triggerCharacters[1] = "."
         //.triggerCharacters[2] = "A-Za-z0-9";
       };
@@ -47,7 +47,7 @@ main {
       //.declarationProvider = false;
       //.executeCommandProvider;
       with( .workspace.workspaceFolders ) {
-        .supported = true;
+        .supported = true
         .changeNotifications = true
       }
       //.experimental;
@@ -55,8 +55,7 @@ main {
   }]
 
   [ shutdown( req )( res ) {
-    println@Console( "Shutdown request received..." )();
-    undef(global);
+    println@Console( "Shutdown request received..." )()
     global.receivedShutdownReq = true
   }]
 
@@ -65,7 +64,7 @@ main {
       exit
       //callExit@Runtime(0)()
     } else {
-      println@Console( "Did not received the shutdown request, exiting anyway..." )();
+      println@Console( "Did not received the shutdown request, exiting anyway..." )()
       exit
       //callExit@Runtime(1)()
     }
