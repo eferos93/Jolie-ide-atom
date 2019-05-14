@@ -14,32 +14,71 @@ inputPort TextDocumentInput {
 
 init {
   println@Console( "txtDoc running" )()
+  global.textDocument[0] = ""
+  k -> global.keywords[#global.keywords]
+  k = "include"
+  k = "execution"
+  K = "inputPort"
+  k = "Interfaces"
+  k = "global"
+  k = "Protocol"
+  k = "OneWay"
+  k = "RequestResponse"
+  k = "type"
+  k = "define"
+  //TODO add all keywords
 }
 
 main {
   [ didOpen( notification ) ]  {
-    global.textDocument = notification.textDocument
-    //TODO implement diagnostics here
+    uri -> notification.textDocument.uri
+    newVersion -> notification.textDocument.version
+    docs -> global.textDocument
+
+    keepRun = true
+    for(i = 0, i < #docs && keepRun, i++) {
+      if(doc.uri == uri && docs.version < newVersion) {
+        docs[i] << notification.textDocument
+        keepRun = false
+      }
+    }
+
+    if( keepRun ) {
+      docs[#docs+1] << notification.textDocument
+    }
+
+    valueToPrettyString@StringUtils( docs )( docsString )
+    println@Console( docsString )()
   }
+
   [ didChange( notification ) ] {
-    global.textDocument = notification.textDocument
+    global.textChanges = notification.textDocument
   }
+
   [ willSave( notification )] {
     global.textDocument = notification.textDocument
   }
+
   [ didSave( notification ) ] {
-    global.textDocument = notification.textDocument
+    println@Console( "File changed " + notification.textDocument.uri )()
   }
+
   [ didClose( notificantion ) ] {
-    if( notification.textDocument.uri == global.textDocument.uri ) {
-      undef( global.textDocument )
+    uri -> notification.textDocument.uri
+    docs -> global.textDocument
+    keepRun = true
+    for(i = 0, i < #docs && keepRun, i++) {
+      if(docs[i].uri == uri) {
+        undef(docs[i])
+        keepRun = false
+      }
     }
   }
   [ completion( completionParams )( completionList ) {
-    textDoc = completionParams.textDocument;
-    position = completionParams.position;
-    line = position.line;
-    character = position.character;
+    textDoc = completionParams.textDocument
+    position = completionParams.position
+    line = position.line
+    character = position.character
     context = completionParams.context
   } ]
 

@@ -1,29 +1,33 @@
+include "types.iol"
+
 interface GeneralInterface {
   OneWay:
-    initialized,
-    onExit,
+    initialized( InitializedParams ),
+    onExit( void ),
     cancelRequest
-
   RequestResponse:
-    initialize,
-    shutdown
+    initialize( InitializeParams )( InitializeResult ),
+    shutdown( void )( void )
 }
 
 interface TextDocumentInterface {
   OneWay:
-    didOpen,
-    didChange,
-    willSave,
-    didSave,
-    didClose,
-     //server -> client
+    didOpen( DidOpenTextDocumentParams ),
+    didChange( DidChangeTextDocumentParams ),
+    willSave( WillSaveTextDocumentParams ),
+    didSave( DidSaveTextDocumentParams ),
+    didClose( DidCloseTextDocumentParams )
   RequestResponse:
-    willSaveWaitUntil,
-    completion,
-    publishDiagnostics
+    willSaveWaitUntil( WillSaveTextDocumentParams )( WillSaveWaitUntilResponse ),
+    completion( CompletionParams )( CompletionResult )
 }
 
 interface WorkspaceInterface {
   OneWay:
-    didChangeWatchedFiles
+    didChangeWatchedFiles( DidChangeWatchedFilesParams ),
+    didChangeWorkspaceFolders( DidChangeWorkspaceFoldersParams ),
+    didChangeConfiguration( DidChangeConfigurationParams )
+  RequestResponse:
+    symbol( WorkspaceSymbolParams )( SymbolInformation ),
+    executeCommand( ExecuteCommandParams )( ExecuteCommandResult )
 }
