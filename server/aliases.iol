@@ -1,4 +1,3 @@
-include "types.iol"
 include "ls_jolie.iol"
 
 outputPort TextDocument {

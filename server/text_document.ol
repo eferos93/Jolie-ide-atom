@@ -31,22 +31,23 @@ init {
 
 main {
   [ didOpen( notification ) ]  {
-    uri -> notification.textDocument.uri;
-    newVersion -> notification.textDocument.version;
-    docs -> global.textDocument;
-    keepRun = true;
+    uri -> notification.textDocument.uri
+    newVersion -> notification.textDocument.version
+    docs -> global.textDocument
+
+    keepRun = true
     for(i = 0, i < #docs && keepRun, i++) {
       if(doc.uri == uri && docs.version < newVersion) {
-        docs[i] << notification.textDocument;
+        docs[i] << notification.textDocument
         keepRun = false
       }
     }
 
     if( keepRun ) {
-      docs[#doc+1] << notification.textDocument
+      docs[#docs+1] << notification.textDocument
     }
 
-    valueToPrettyString@StringUtils( docs )( docsString );
+    valueToPrettyString@StringUtils( docs )( docsString )
     println@Console( docsString )()
   }
 
