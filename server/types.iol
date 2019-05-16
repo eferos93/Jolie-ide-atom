@@ -56,12 +56,12 @@ type WorkspaceClientCapabilities: void {
   .configuration?: bool
 }
 
-type ResourceOperationKind: string //namespace
-type FailureHandlingKind: string //namespace
-type MarkupKind: string //namespace
-type SymbolKind: int //namespace
-type CompletionItemKind: int // namespace
-type CodeActionKind: string //namespace
+type ResourceOperationKind: string //namespace, see official spec
+type FailureHandlingKind: string //namespace, see official spec
+type MarkupKind: string //namespace, see official spec
+type SymbolKind: int //namespace, see official spec
+type CompletionItemKind: int // namespace, see official spec
+type CodeActionKind: string //namespace, see official spec
 
 type TextDocumentClientCapabilities: void {
   .synchronization?: void {
@@ -378,7 +378,7 @@ type DidSaveTextDocumentParams: void {
 }
 
 type DidCloseTextDocumentParams: void {
-  .textDocument: VersionedTextDocumentIdentifier
+  .textDocument: TextDocumentIdentifier
 }
 
 type TextEdit: void {

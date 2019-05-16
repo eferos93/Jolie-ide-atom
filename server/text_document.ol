@@ -14,7 +14,6 @@ inputPort TextDocumentInput {
 
 init {
   println@Console( "txtDoc running" )()
-  global.textDocument[0] = ""
   k -> global.keywords[#global.keywords]
   k = "include"
   k = "execution"
@@ -31,31 +30,34 @@ init {
 
 main {
   [ didOpen( notification ) ]  {
+    newDoc -> notification.textDocument
     uri -> notification.textDocument.uri
-    newVersion -> notification.textDocument.version
+    newDocVersion -> notification.textDocument.version
     docs -> global.textDocument
+    keepRunning = true
 
-    keepRun = true
-    for(i = 0, i < #docs && keepRun, i++) {
-      if(doc.uri == uri && docs.version < newVersion) {
-        docs[i] << notification.textDocument
-        keepRun = false
+    for(i = 0, i < #docs && keepRunning, i++) {
+      if(docs[i].uri == uri && docs[i].version < newDocVersion) {
+        docs[i] << newDoc
+        keepRunning = false
       }
     }
 
-    if( keepRun ) {
-      docs[#docs+1] << notification.textDocument
+    if( keepRunning ) {
+      docs[#docs] << newDoc
     }
 
-    valueToPrettyString@StringUtils( docs )( docsString )
-    println@Console( docsString )()
+    for( i = 0, i < #docs, i++ ) {
+      println@Console( docs[i].uri )()
+    }
   }
 
   [ didChange( notification ) ] {
+    println@Console( "didChange received" )()
     global.textChanges = notification.textDocument
   }
 
-  [ willSave( notification )] {
+  [ willSave( notification ) ] {
     global.textDocument = notification.textDocument
   }
 
@@ -63,18 +65,24 @@ main {
     println@Console( "File changed " + notification.textDocument.uri )()
   }
 
-  [ didClose( notificantion ) ] {
+  [ didClose( notification ) ] {
     uri -> notification.textDocument.uri
     docs -> global.textDocument
-    keepRun = true
-    for(i = 0, i < #docs && keepRun, i++) {
+    keepRunning = true
+    for(i = 0, i < #docs && keepRunning, i++) {
       if(docs[i].uri == uri) {
         undef(docs[i])
-        keepRun = false
+        keepRunning = false
       }
     }
+
+    for( i = 0, i < #docs, i++ ) {
+      println@Console( docs[i].uri )()
+    }
   }
+
   [ completion( completionParams )( completionList ) {
+    println@Console( "Completion req received" )()
     textDoc = completionParams.textDocument
     position = completionParams.position
     line = position.line

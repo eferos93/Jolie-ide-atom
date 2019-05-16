@@ -8,7 +8,7 @@ include "aliases.iol"
 
 
 init {
-  println@Console("Jolie Language Server Started")()
+  println@Console( "Jolie-IDE Server Started" )()
   global.receivedShutdownReq = false
 }
 
@@ -18,21 +18,29 @@ main {
     global.processId = initializeParams.processId
     global.rootUri = initializeParams.rootUri
     global.clientCapabilities << initializeParams.capabilities
-    println@Console( "Process ID: " + global.processId )()
-    println@Console( "Root Uri: " + global.rootUri )()
+    valueToPrettyString@StringUtils( initializeParams )( client )
+    println@Console( client )()
     with( serverCapabilities.capabilities ) {
       .textDocumentSync = 2
       with( .completionProvider ) {
-        //.resolveProvider = true;
+        .resolveProvider = false
         .triggerCharacters[0] = "="
         .triggerCharacters[1] = "."
+        .triggerCharacters[2] = "a"
+        .triggerCharacters[3] = "b"
+        .triggerCharacters[4] = "c"
+        .triggerCharacters[5] = "d"
+        .triggerCharacters[6] = "e"
+        .triggerCharacters[7] = "f"
+        .triggerCharacters[8] = "g"
+        .triggerCharacters[9] = "h"
         //.triggerCharacters[2] = "A-Za-z0-9";
       };
-      //.signatureHelpProvider.triggerCharacters[0] = "(";
-      //.definitionProvider = true;
-      //.typeDefinitionProvider = true;
+      .signatureHelpProvider.triggerCharacters[0] = "(";
+      .definitionProvider = true;
+      .typeDefinitionProvider = true;
       //.implementationProvider = true;
-      //.referenceProvider = true;
+      .referenceProvider = true;
       //.documentHighlightProvider = false;
       //.workspaceSymbolProvider = false;
       //.documentSymbolProvider = false;
@@ -60,14 +68,11 @@ main {
   }]
 
   [ onExit( notification ) ] {
-    if( global.receivedShutdownReq ) {
-      exit
-      //callExit@Runtime(0)()
-    } else {
+    if( !global.receivedShutdownReq ) {
       println@Console( "Did not received the shutdown request, exiting anyway..." )()
-      exit
-      //callExit@Runtime(1)()
     }
+    println@Console( "Exiting Jolie Language server..." )()
+    exit
   }
 
   [ initialized( initializedParams ) ] {
