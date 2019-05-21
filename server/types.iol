@@ -422,7 +422,7 @@ type CompletionList: void {
 	/**
 	 * The completion items.
 	 */
-	.items: CompletionItem
+	.items[1,*]: CompletionItem
 }
 
 type CompletionItem: void {
@@ -651,3 +651,15 @@ type ExecuteCommandParams: void {
 }
 
 type ExecuteCommandResult: undefined
+
+type Hover: void {
+  .contents[1,*]: MarkedString | MarkupContent
+  .range?: Range
+}
+
+type MarkedString: string | MarkSt
+
+type MarkSt: void {
+  .language: string
+  .value: string
+}

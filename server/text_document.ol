@@ -25,6 +25,13 @@ init {
   k = "RequestResponse"
   k = "type"
   k = "define"
+  k = "true"
+  k = "false"
+  k = "int"
+  k = "inputPort"
+  k = "outputPort"
+  k = "interface"
+  
   //TODO add all keywords
 }
 
@@ -82,12 +89,16 @@ main {
   }
 
   [ completion( completionParams )( completionList ) {
-    println@Console( "Completion req received" )()
-    textDoc = completionParams.textDocument
-    position = completionParams.position
-    line = position.line
-    character = position.character
-    context = completionParams.context
+      println@Console( "Completion req received" )()
+      textDoc << completionParams.textDocument
+      position << completionParams.position
+      line << position.line
+      character << position.character
+      context << completionParams.context
+  } ]
+
+  [ hover( hoverReq )( hoverResp ) {
+      println@Console( "hover req received.." )(  )
   } ]
 
 }

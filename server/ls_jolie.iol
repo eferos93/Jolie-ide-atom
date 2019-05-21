@@ -19,7 +19,8 @@ interface TextDocumentInterface {
     didClose( DidCloseTextDocumentParams )
   RequestResponse:
     willSaveWaitUntil( WillSaveTextDocumentParams )( WillSaveWaitUntilResponse ),
-    completion( CompletionParams )( CompletionResult )
+    completion( CompletionParams )( CompletionResult ),
+    hover( TextDocumentPositionParams )( Hover )
 }
 
 interface WorkspaceInterface {
