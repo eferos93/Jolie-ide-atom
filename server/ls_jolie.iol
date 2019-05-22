@@ -20,7 +20,8 @@ interface TextDocumentInterface {
   RequestResponse:
     willSaveWaitUntil( WillSaveTextDocumentParams )( WillSaveWaitUntilResponse ),
     completion( CompletionParams )( CompletionResult ),
-    hover( TextDocumentPositionParams )( Hover )
+    hover( TextDocumentPositionParams )( Hover ),
+    definition( TextDocumentPositionParams )( Location )
 }
 
 interface WorkspaceInterface {

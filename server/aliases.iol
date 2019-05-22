@@ -26,6 +26,7 @@ inputPort Input {
                       .osc.didClose.alias = "textDocument/didClose"
                       .osc.completion.alias = "textDocument/completion"
                       .osc.hover.alias = "textDocument/hover"
+                      .osc.definition.alias = "textDocument/definition"
                       .osc.didChangeWatchedFiles.alias = "workspace/didChangeWatchedFiles"
                       .osc.didChangeWorkspaceFolders.alias = "workspace/didChangeWorkspaceFolders"
                       .osc.didChangeConfiguration.alias = "workspace/didChangeConfiguration"

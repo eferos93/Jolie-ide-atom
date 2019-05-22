@@ -3,6 +3,7 @@ include "ls_jolie.iol"
 include "string_utils.iol"
 include "runtime.iol"
 include "exec.iol"
+include "utils/tree_utils"
 
 execution{ concurrent }
 
@@ -11,6 +12,38 @@ inputPort TextDocumentInput {
   Interfaces: TextDocumentInterface
 }
 
+outputPort TreeUtils {
+Location: "local"
+Protocol: soap
+Interfaces: TreeInterface
+}
+
+define saveDoc {
+  newDoc -> notification.textDocument
+  uri -> notification.textDocument.uri
+  newDocVersion -> notification.textDocument.version
+  docs -> global.textDocument
+  keepRunning = true
+
+  for(i = 0, i < #docs && keepRunning, i++) {
+    if(docs[i].uri == uri && docs[i].version < newDocVersion) {
+      docs[i] << newDoc
+      keepRunning = false
+    }
+  }
+
+  if( keepRunning ) {
+    docs[#docs] << newDoc
+  }
+}
+
+define findTextDoc {
+  docs -> global.textDocument
+  keepRunning = true
+  for(i=0, i<#docs && keepRunning, i++) {
+    if()
+  }
+}
 
 init {
   println@Console( "txtDoc running" )()
@@ -31,28 +64,13 @@ init {
   k = "inputPort"
   k = "outputPort"
   k = "interface"
-  
+
   //TODO add all keywords
 }
 
 main {
   [ didOpen( notification ) ]  {
-    newDoc -> notification.textDocument
-    uri -> notification.textDocument.uri
-    newDocVersion -> notification.textDocument.version
-    docs -> global.textDocument
-    keepRunning = true
-
-    for(i = 0, i < #docs && keepRunning, i++) {
-      if(docs[i].uri == uri && docs[i].version < newDocVersion) {
-        docs[i] << newDoc
-        keepRunning = false
-      }
-    }
-
-    if( keepRunning ) {
-      docs[#docs] << newDoc
-    }
+    saveDoc
 
     for( i = 0, i < #docs, i++ ) {
       println@Console( docs[i].uri )()
@@ -61,15 +79,16 @@ main {
 
   [ didChange( notification ) ] {
     println@Console( "didChange received" )()
-    global.textChanges = notification.textDocument
+    saveDoc
   }
 
   [ willSave( notification ) ] {
-    global.textDocument = notification.textDocument
+    //global.textDocument = notification.textDocument
+    println@Console( "willSave received" )()
   }
 
   [ didSave( notification ) ] {
-    println@Console( "File changed " + notification.textDocument.uri )()
+    println@Console( "File saved " + notification.textDocument.uri )()
   }
 
   [ didClose( notification ) ] {
@@ -89,16 +108,22 @@ main {
   }
 
   [ completion( completionParams )( completionList ) {
+      valueToPrettyString@StringUtils( completionParams )( completionParamsString )
       println@Console( "Completion req received" )()
-      textDoc << completionParams.textDocument
+      println@Console( completionParamsString )()
+      textDocUri = completionParams.textDocument.uri
       position << completionParams.position
-      line << position.line
-      character << position.character
       context << completionParams.context
+      println@Console( "" )()
   } ]
 
   [ hover( hoverReq )( hoverResp ) {
       println@Console( "hover req received.." )(  )
   } ]
+
+  [ definition( defRequest )( defResponse ){
+      valueToPrettyString@StringUtils( defRequest )( reqString )
+      println@Console( reqString )()
+  }]
 
 }

@@ -1,11 +1,9 @@
 include "console.iol"
 include "string_utils.iol"
 include "runtime.iol"
-
-execution{ concurrent }
-
 include "aliases.iol"
 
+execution{ concurrent }
 
 init {
   println@Console( "Jolie-IDE Server Started" )()
@@ -20,25 +18,25 @@ main {
       global.clientCapabilities << initializeParams.capabilities
       valueToPrettyString@StringUtils( initializeParams )( client )
       println@Console( client )()
-      with( serverCapabilities.capabilities ) {
-        .textDocumentSync = 1 //0 = none, 1 = full, 2 = incremental
-        with( .completionProvider ) {
-          .resolveProvider = false
-          .triggerCharacters[0] = "="
-          .triggerCharacters[1] = "."
-          .triggerCharacters[2] = "@"
-          .triggerCharacters[3] = "A-Za-z0-9"
-        };
-        .signatureHelpProvider.triggerCharacters[0] = "("
-        .definitionProvider = true
-        .hoverProvider = true
-        .documentSymbolProvider = true
-        .referenceProvider = true
+      serverCapabilities.capabilities << {
+        textDocumentSync = 1 //0 = none, 1 = full, 2 = incremental
+        completionProvider << {
+          resolveProvider = false
+          triggerCharacters[0] = "="
+          triggerCharacters[1] = "."
+          triggerCharacters[2] = "@"
+        }
+        signatureHelpProvider.triggerCharacters[0] = "("
+        definitionProvider = true
+        hoverProvider = true
+        definitionProvider = true
+        //documentSymbolProvider = true
+        //referenceProvider = true
         //.experimental;
       }
     }]
 
-    [ initialized( initializedParams ) ] {
+    [ initialized(  ) ] {
       println@Console( "Initialized " )()
     }
 

@@ -11,14 +11,27 @@
   "activationEvents": [
     "onLanguage:jolie"
   ],
-  "categories": ["Programming Languages"],
+  "categories": [
+    "Programming Languages"
+  ],
   "repository": "https://github.com/atom/jolie-language-client",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
-    "atom-languageclient":"^0.9.9",
-    "language-jolie":"^0.6.0"
+    "atom-languageclient": "^0.9.9"
+  },
+  "providedServices": {
+    "outline-view": {
+      "versions": {
+        "0.1.0": "provideOutlines"
+      }
+    },
+    "autocomplete.provider": {
+      "versions": {
+        "0.0.1": "provideAutocomplete"
+      }
+    }
   }
 }
