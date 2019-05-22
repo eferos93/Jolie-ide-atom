@@ -126,12 +126,6 @@ main {
       context << completionParams.context
       //search if the doc is saved in global.textDocumentSync
       searchDoc
-      if( fileFound ) {
-
-      } else {
-
-      }
-
   } ]
 
   [ hover( hoverReq )( hoverResp ) {
