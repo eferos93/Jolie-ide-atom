@@ -663,11 +663,3 @@ type MarkSt  {
   language: string
   value: string
 }
-
-type Tree: Node {
-  .node[1,2]: Node | Tree
-}
-
-type Node {
-  .doc: TextDocumentItem
-}

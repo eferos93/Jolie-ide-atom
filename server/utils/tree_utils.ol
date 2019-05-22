@@ -2,7 +2,8 @@ include "console.ol"
 
 interface TreeInterface {
   RequestResponse:
-    insert( undefined )( Tree )
+    insert( undefined )( Tree ),
+    delete( undefined )( Tree )
 }
 
 type Tree: Node {
@@ -17,4 +18,8 @@ inputPort TreeUtils {
   Location: "local"
   Protocol: soap
   Interfaces: TreeInterface
+}
+
+main {
+  insert()()
 }
