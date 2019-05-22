@@ -20,5 +20,17 @@
   "dependencies": {
     "atom-languageclient":"^0.9.9",
     "language-jolie":"^0.6.0"
+  },
+  "providedServices": {
+    "outline-view": {
+      "versions": {
+        "0.1.0": "provideOutlines"
+      }
+    },
+    "autocomplete.provider": {
+      "versions": {
+        "0.0.1": "provideAutocomplete"
+      }
+    }
   }
 }

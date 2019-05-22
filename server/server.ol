@@ -27,7 +27,6 @@ main {
           .triggerCharacters[0] = "="
           .triggerCharacters[1] = "."
           .triggerCharacters[2] = "@"
-          .triggerCharacters[3] = "A-Za-z0-9"
         };
         .signatureHelpProvider.triggerCharacters[0] = "("
         .definitionProvider = true
