@@ -21,7 +21,7 @@ main {
       valueToPrettyString@StringUtils( initializeParams )( client )
       println@Console( client )()
       with( serverCapabilities.capabilities ) {
-        .textDocumentSync = 1 //0 = none, 1 = full, 2 = incremental
+        .textDocumentSync = 2 //0 = none, 1 = full, 2 = incremental
         with( .completionProvider ) {
           .resolveProvider = false
           .triggerCharacters[0] = "="
@@ -35,7 +35,7 @@ main {
         .referenceProvider = true
         //.experimental;
       }
-    }]
+    }] { }
 
     [ initialized( initializedParams ) ] {
       println@Console( "Initialized " )()

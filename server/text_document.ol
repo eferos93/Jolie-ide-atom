@@ -11,7 +11,20 @@ inputPort TextDocumentInput {
   Interfaces: TextDocumentInterface
 }
 
-define newDoc
+define insertDoc
+{
+  splitReq = newDoc.text
+  splitReq.regex = "\n"
+  split@StringUtils( splitReq )( splitRes )
+  splitRes << {
+    uri = newDoc.uri
+    languageId = newDoc.languageId
+    version = newDoc.version
+  }
+  docs[i] << splitRes
+}
+
+define newDocument
 {
   newDoc -> notification.textDocument
   uri -> notification.textDocument.uri
@@ -21,21 +34,13 @@ define newDoc
 
   for(i = 0, i < #docs && keepRunning, i++) {
     if(docs[i].uri == uri && docs[i].version < newDocVersion) {
-      splitReq = newDoc.text
-      splitReq.regex = "\n"
-      split@StringUtils( splitReq )( splitRes )
-      splitRes << {
-        uri = newDoc.uri
-        languageId = newDoc.languageId
-        version = newdoc.version
-      }
-      docs[i] << splitRes
+      insertDoc
       keepRunning = false
     }
   }
 
   if( keepRunning ) {
-    docs[#docs] << newDoc
+    insertDoc
   }
 }
 
@@ -51,10 +56,11 @@ define searchDoc
   }
 }
 
-define printAllDocUris
+define printAllDocs
 {
   for( i = 0, i < #docs, i++ ) {
-    println@Console( docs[i] )()
+    valueToPrettyString@StringUtils( docs[i] )( doc )
+    println@Console( doc )()
   }
 }
 
@@ -83,15 +89,34 @@ init {
 
 main {
   [ didOpen( notification ) ]  {
-    newDoc
-    printAllDocUris
+    newDocument
+    //printAllDocs
 
   }
 
   [ didChange( notification ) ] {
     println@Console( "didChange received" )()
-    newDoc
-    printAllDocUris
+    modifiedDoc -> notification.contentChanges
+    newUri -> notification.textDocument.uri
+    newVersion -> notification.textDocument.version
+    docs -> global.textDocument
+    keepRunning = true
+
+    /*for(i = 0, i < #docs && keepRunning, i++) {
+      if(docs[i].uri == newUri && docs[i].version < newVersion) {
+        splitReq = modifiedDoc[1].text
+        splitReq.regex = "\n"
+        split@StringUtils( splitReq )( splitRes )
+        splitRes << {
+          uri = newUri
+          //languageId = newDoc.languageId
+          version = newversion
+        }
+        docs[i] << splitRes
+        keepRunning = false
+      }
+    }*/
+    //printAllDocs
   }
 
   [ willSave( notification ) ] {
