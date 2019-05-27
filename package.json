@@ -11,13 +11,15 @@
   "activationEvents": [
     "onLanguage:jolie"
   ],
-  "categories": ["Programming Languages"],
+  "categories": [
+    "Programming Languages"
+  ],
   "repository": "https://github.com/atom/jolie-language-client",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
-    "atom-languageclient":"^0.9.9"
+    "atom-languageclient": "^0.9.9"
   }
 }
