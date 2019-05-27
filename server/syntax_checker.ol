@@ -8,12 +8,12 @@ execution{ concurrent }
 
 inputPort SyntaxChecker {
   Location: "local"
-  Protocol: soap
   Interfaces: SyntaxCheckerInterface
 }
 
 main {
   syntaxCheck( code )( syntaxCheckResult ) {
+    messageRegex = "\s*(?<file>.+):\s*(?<line>\d+):\s*(?<type>error|warning)\s*:\s*(?<message>.+)"
     file.filename = new + ".ol"
     file.content = code
     writeFile@File( file )()
@@ -23,6 +23,12 @@ main {
     cmd.stdOutConsoleEnable = true
     cmd.waitFor = 1
     exec@Exec( cmd )( result )
-    valueToPrettyString@StringUtils( result )( syntaxCheckResult )
+    delete@File( file.filename )()
+    if ( result.exiCode != 0 ) {
+      matchReq = result.stderr
+      matchReq.regex = messageRegex
+      match@StringUtils( matchReq )( matchRes )
+    }
+    valueToPrettyString@StringUtils( matchRes )( syntaxCheckResult )
   }
 }

@@ -12,8 +12,6 @@ inputPort TextDocumentInput {
 }
 
 outputPort SyntaxChecker {
-  Location: "local"
-  Protocol: soap
   Interfaces: SyntaxCheckerInterface
 }
 
@@ -21,6 +19,10 @@ outputPort NotificationsToClient {
   Location: "local"
   Protocol: soap
   Interfaces: ServerToClientInternalInterface
+}
+
+embedded {
+  Jolie: "syntax_checker.ol" in SyntaxChecker
 }
 
 define insertDoc
