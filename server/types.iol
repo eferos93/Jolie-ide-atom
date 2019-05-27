@@ -138,7 +138,7 @@ type TextDocumentClientCapabilities {
   codeAction? {
     dynamicRegistration?: bool
     codeActionLiteralSupport? {
-      codeActionKind:void {
+      codeActionKind {
         valueSet[1,*]: CodeActionKind
       }
     }
@@ -662,4 +662,18 @@ type MarkedString: string | MarkSt
 type MarkSt {
   language: string
   value: string
+}
+
+type Diagnostic {
+  range: Range
+  severity?: int //1=error, 2=warn, 3=info,4=hint
+  code?: int | string
+  source?: string
+  message: string
+  relatedInformation*: DiagnosticRelatedInformation
+}
+
+type DiagnosticRelatedInformation {
+  location: Location
+  message: string
 }

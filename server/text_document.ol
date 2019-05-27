@@ -11,6 +11,18 @@ inputPort TextDocumentInput {
   Interfaces: TextDocumentInterface
 }
 
+outputPort SyntaxChecker {
+  Location: "local"
+  Protocol: soap
+  Interfaces: SyntaxCheckerInterface
+}
+
+outputPort NotificationsToClient {
+  Location: "local"
+  Protocol: soap
+  Interfaces: ServerToClientInternalInterface
+}
+
 define insertDoc
 {
   splitReq = newDoc.text
@@ -90,6 +102,9 @@ init {
 main {
   [ didOpen( notification ) ]  {
     newDocument
+    syntaxCheck@SyntaxChecker( newDoc.text )( res )
+    //println@Console( res )()
+    //diagnostics@NotificationsToClient( "hi" )
     //printAllDocs
 
   }
@@ -134,7 +149,7 @@ main {
     keepRunning = true
     for(i = 0, i < #docs && keepRunning, i++) {
       if(docs[i].uri == uri) {
-        undef(docs[i])
+        undef( docs[i] )
         keepRunning = false
       }
     }

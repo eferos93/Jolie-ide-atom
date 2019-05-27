@@ -32,3 +32,18 @@ interface WorkspaceInterface {
     symbol( WorkspaceSymbolParams )( SymbolInformation ),
     executeCommand( ExecuteCommandParams )( ExecuteCommandResult )
 }
+
+interface ServerToClient {
+  OneWay:
+    publishDiagnostics( Diagnostic )
+}
+
+interface ServerToClientInternalInterface {
+  OneWay:
+    diagnostics( Diagnostic )
+}
+
+interface SyntaxCheckerInterface {
+  RequestResponse:
+    syntaxCheck
+}

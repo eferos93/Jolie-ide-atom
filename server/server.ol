@@ -30,12 +30,12 @@ main {
         };
         .signatureHelpProvider.triggerCharacters[0] = "("
         .definitionProvider = true
-        .hoverProvider = true
+        .hoverProvider = false
         .documentSymbolProvider = true
         .referenceProvider = true
         //.experimental;
       }
-    }] { }
+    }]
 
     [ initialized( initializedParams ) ] {
       println@Console( "Initialized " )()
@@ -51,5 +51,12 @@ main {
       }
       println@Console( "Exiting Jolie Language server..." )()
       exit
+    }
+    [ diagnostics( textDocument ) ] {
+        //messageRegex = "\s*(?<file>.+):\s*(?<line>\d+):\s*(?<type>error|warning)\s*:\s*(?<message>.+)"
+        //command = "jolie"
+        //command.args[0] = textDocument.uri
+
+        publishDiagnostics@Client( textDocument )
     }
 }
