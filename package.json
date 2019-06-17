@@ -22,14 +22,26 @@
     "language-jolie":"^0.6.0"
   },
   "providedServices": {
+    "autocomplete.provider": {
+      "versions": {
+        "0.1.0": "provideAutocomplete"
+      }
+    },
     "outline-view": {
       "versions": {
         "0.1.0": "provideOutlines"
       }
-    },
-    "autocomplete.provider": {
+    }
+  },
+  "consumedServices": {
+    "linter-indie": {
       "versions": {
-        "0.0.1": "provideAutocomplete"
+        "2.0.0": "consumeLinterV2"
+      }
+    },
+    "atom-ide-busy-signal": {
+      "versions": {
+        "0.1.0": "consumeBusySignal"
       }
     }
   }

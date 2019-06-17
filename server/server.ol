@@ -2,26 +2,28 @@ include "console.iol"
 include "string_utils.iol"
 include "runtime.iol"
 
-execution{ concurrent }
+execution { concurrent }
 
 include "aliases.iol"
 
 
 init {
+  Client.location -> global.clientLocation
   println@Console( "Jolie-IDE Server Started" )()
   global.receivedShutdownReq = false
+
 }
 
 main {
     [ initialize( initializeParams )( serverCapabilities ) {
-      println@Console( "connessione avvenuta" )()
+      println@Console( "Initialize message received" )()
       global.processId = initializeParams.processId
       global.rootUri = initializeParams.rootUri
       global.clientCapabilities << initializeParams.capabilities
-      valueToPrettyString@StringUtils( initializeParams )( client )
-      println@Console( client )()
+      //valueToPrettyString@StringUtils( initializeParams )( client )
+      //println@Console( client )()
       with( serverCapabilities.capabilities ) {
-        .textDocumentSync = 2 //0 = none, 1 = full, 2 = incremental
+        .textDocumentSync = 1 //0 = none, 1 = full, 2 = incremental
         with( .completionProvider ) {
           .resolveProvider = false
           .triggerCharacters[0] = "="
@@ -29,16 +31,16 @@ main {
           .triggerCharacters[2] = "@"
         };
         .signatureHelpProvider.triggerCharacters[0] = "("
-        .definitionProvider = true
+        .definitionProvider = false
         .hoverProvider = false
-        .documentSymbolProvider = true
-        .referenceProvider = true
+        .documentSymbolProvider = false
+        .referenceProvider = false
         //.experimental;
       }
     }]
 
     [ initialized( initializedParams ) ] {
-      println@Console( "Initialized " )()
+      println@Console( "Initialization done " )()
     }
 
     [ shutdown( req )( res ) {
@@ -52,11 +54,15 @@ main {
       println@Console( "Exiting Jolie Language server..." )()
       exit
     }
-    [ diagnostics( textDocument ) ] {
-        //messageRegex = "\s*(?<file>.+):\s*(?<line>\d+):\s*(?<type>error|warning)\s*:\s*(?<message>.+)"
-        //command = "jolie"
-        //command.args[0] = textDocument.uri
 
-        publishDiagnostics@Client( textDocument )
+    [ publishDiagnostics( diagnosticParams ) ] {
+      println@Console( "publishing Diagnostics" )()
+      publishDiagnostics@Client( diagnosticParams )
+
+    }
+
+    [ cancelRequest( cancelReq ) ] {
+        println@Console( "cancelRequest received ID: " + cancelReq.id )()
+        //TODO
     }
 }

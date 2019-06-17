@@ -38,14 +38,7 @@ main {
   [ didChangeConfiguration( notification ) ] {
       valueToPrettyString@StringUtils( notification )(res)
       println@Console("didChangeConfiguration received " + res)()
-      //TODO
   }
-
-  [ symbol( symbolRequest )( symbolResponse ) {
-      valueToPrettyString@StringUtils( symbolReq )(res)
-      println@Console( "symbolReq received " + res )()
-      //TODO
-  } ]
 
   [ executeCommand( commandParams )( commandResult ) {
       cmd -> commandParams.commandParams

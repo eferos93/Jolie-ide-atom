@@ -20,7 +20,14 @@ interface TextDocumentInterface {
   RequestResponse:
     willSaveWaitUntil( WillSaveTextDocumentParams )( WillSaveWaitUntilResponse ),
     completion( CompletionParams )( CompletionResult ),
-    hover( TextDocumentPositionParams )( Hover )
+    hover( TextDocumentPositionParams )( Hover ),
+    documentSymbol( DocumentSymbolParams )( undefined )
+}
+
+interface JavaServiceInterface {
+  RequestResponse:
+    documentSymbol( DocumentSymbolParams )( undefined ),
+    completion
 }
 
 interface WorkspaceInterface {
@@ -29,21 +36,16 @@ interface WorkspaceInterface {
     didChangeWorkspaceFolders( DidChangeWorkspaceFoldersParams ),
     didChangeConfiguration( DidChangeConfigurationParams )
   RequestResponse:
-    symbol( WorkspaceSymbolParams )( SymbolInformation ),
+    documentSymbol( WorkspaceSymbolParams )( undefined ),
     executeCommand( ExecuteCommandParams )( ExecuteCommandResult )
 }
 
 interface ServerToClient {
   OneWay:
-    publishDiagnostics( Diagnostic )
-}
-
-interface ServerToClientInternalInterface {
-  OneWay:
-    diagnostics( Diagnostic )
+    publishDiagnostics( PublishDiagnosticParams )
 }
 
 interface SyntaxCheckerInterface {
-  RequestResponse:
+  OneWay:
     syntaxCheck
 }

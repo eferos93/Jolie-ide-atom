@@ -4,3 +4,12 @@ node_modules
 liberrors.txt
 prova.iol
 server_temp.ol
+/JavaServices/nbproject/private/
+/JavaServices/build
+/lspServices/nbproject/private/
+/lspServices/build/
+/lspServices/dist/
+/lspservices/nbproject/private/
+/lspservices/dist/
+/lspservices/build/
+NetBeans test config

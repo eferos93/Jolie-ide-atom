@@ -175,9 +175,9 @@ type ServerCapabilities {
   completionProvider?: CompletionOptions
   signatureHelpProvider?: SignatureHelpOptions
   definitionProvider?: bool
-  typeDefinitionProvider?: undefined //do vedi specifiche
-  implementationProvider?: undefined //do vedi specifiche
-  referenceProvider?: undefined //do see specification
+  typeDefinitionProvider?: undefined //TODO see LSP specification
+  implementationProvider?: undefined //TODO see LSP specification
+  referenceProvider?: undefined //TODO see LSP specification
   documentHighlightProvider?: bool
   documentSymbolProvider?: bool
   codeActionProvider?: CodeLensOptions
@@ -186,9 +186,9 @@ type ServerCapabilities {
   documentOnTypeFormattingProvider?: DocumentOnTypeFormattingOptions
   renameProvider?: bool | RenameOptions
   documentLinkProvider?: DocumentLinkOptions
-  colorProvider?: undefined //do see specification
-  foldingRangeProvider?: undefined //do see specification
-  declarationProvider?: undefined //see specification
+  colorProvider?: undefined //TODO see LSP specification
+  foldingRangeProvider?: undefined //TODO see LSP specification
+  declarationProvider?: undefined //TODO see LSP specification
   executeCommandProvider?: ExecuteCommandOptions
   workspace? {
     workspaceFolders? {
@@ -422,7 +422,9 @@ type CompletionList {
 	/**
 	 * The completion items
 	 */
-	items[1,*]: CompletionItem
+	items {
+    _[1,*]: CompletionItem
+  }
 }
 
 type CompletionItem {
@@ -553,7 +555,7 @@ type CompletionItem {
  *	value: [
  *		'# Header',
  *		'Some text',
- *		'```typescript',
+ *		'```typescript',ol INFO: [server.ol] [JSON-RPC debug] Receiving: {"jsonrpc":"2.
  *		'someCode();',
  *		'```'
  *	]join('\n')
@@ -664,9 +666,17 @@ type MarkSt {
   value: string
 }
 
+type PublishDiagnosticParams {
+  uri: DocumentUri
+  diagnostics*: Diagnostic | void
+  /*diagnostics {
+      _[1,*]: Diagnostic | void
+  }*/
+}
+
 type Diagnostic {
   range: Range
-  severity?: int //1=error, 2=warn, 3=info,4=hint
+  severity?: int //1=error, 2=warn, 3=info, 4=hint
   code?: int | string
   source?: string
   message: string
@@ -676,4 +686,8 @@ type Diagnostic {
 type DiagnosticRelatedInformation {
   location: Location
   message: string
+}
+
+type DocumentSymbolParams {
+  textDocument: TextDocumentIdentifier
 }

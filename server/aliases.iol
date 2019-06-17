@@ -1,5 +1,9 @@
 include "ls_jolie.iol"
 
+constants {
+  Location_JolieLS = "socket://localhost:8080"
+}
+
 outputPort TextDocument {
   Interfaces: TextDocumentInterface
 }
@@ -10,20 +14,16 @@ outputPort Workspace {
 
 embedded {
   Jolie: "text_document.ol" in TextDocument,
-         "workspace.ol" in Workspace
-}
-
-inputPort NotificationsToClient {
-  Location: "local"
-  Protocol: soap 
-  Interfaces: ServerToClientInternalInterface
+         "workspace.ol" in Workspace,
+         "syntax_checker.ol"
 }
 
 inputPort Input {
   //Location: "socket://localhost:8080"
   Location: Location_JolieLS
   Protocol: jsonrpc { //.debug = true
-                      clientLocation -> Client.location
+                      clientLocation -> global.clientLocation
+                      clientOutputPort = "Client"
                       transport="lsp"
                       osc.onExit.alias = "exit"
                       osc.cancelRequest.alias = "$/cancelRequest"
@@ -35,6 +35,7 @@ inputPort Input {
                       osc.completion.alias = "textDocument/completion"
                       osc.hover.alias = "textDocument/hover"
                       osc.publishDiagnostics.alias = "textDocument/publishDiagnostics"
+                      osc.publishDiagnostics.isNullable = true
                       osc.didChangeWatchedFiles.alias = "workspace/didChangeWatchedFiles"
                       osc.didChangeWorkspaceFolders.alias = "workspace/didChangeWorkspaceFolders"
                       osc.didChangeConfiguration.alias = "workspace/didChangeConfiguration"
@@ -46,8 +47,13 @@ inputPort Input {
 }
 
 outputPort Client {
-Protocol: jsonrpc {
-  transport = "lsp"
+  Protocol: jsonrpc {
+    transport = "lsp"
+  }
+  Interfaces: ServerToClient
 }
-Interfaces: ServerToClient
+
+inputPort NotificationsToClient {
+  Location: "local://Client"
+  interfaces: ServerToClient
 }

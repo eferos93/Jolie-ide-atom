@@ -1,34 +1,88 @@
 include "console.iol"
 include "ls_jolie.iol"
 include "exec.iol"
-include "file.iol"
 include "string_utils.iol"
+
+constants {
+  INTEGER_MAX_VALUE = 2147483647
+}
 
 execution{ concurrent }
 
 inputPort SyntaxChecker {
-  Location: "local"
+  Location: "local://SyntaxChecker"
   Interfaces: SyntaxCheckerInterface
 }
 
+outputPort Client {
+  location: "local://Client"
+  Interfaces: ServerToClient
+}
+
 main {
-  syntaxCheck( code )( syntaxCheckResult ) {
-    messageRegex = "\s*(?<file>.+):\s*(?<line>\d+):\s*(?<type>error|warning)\s*:\s*(?<message>.+)"
-    file.filename = new + ".ol"
-    file.content = code
-    writeFile@File( file )()
+  [ syntaxCheck( document ) ] {
+    println@Console( "syntaxChecker started for " + document.path )()
+
     cmd = "jolie"
     cmd.args[0] = "--check"
-    cmd.args[1] = file.filename
+    cmd.args[1] = document.path
     cmd.stdOutConsoleEnable = true
     cmd.waitFor = 1
     exec@Exec( cmd )( result )
-    delete@File( file.filename )()
-    if ( result.exiCode != 0 ) {
+    valueToPrettyString@StringUtils( result )( str )
+    println@Console( str )()
+    if ( result.exitCode == 0 ) {
+      diagnosticParams << {
+        uri = document.path
+        diagnostics = void
+      }
+      valueToPrettyString@StringUtils( diagnosticParams )( diagString )
+      println@Console( diagString )()
+
+      publishDiagnostics@Client( diagnosticParams )
+      println@Console( "SyntaxChecker ended: no errors" )()
+    } else {
+      //if we have an error we apply a regex to get error message and line
+      messageRegex = "\\s*(.+):\\s*(\\d+):\\s*(error|warning)\\s*:\\s*(.+)"
       matchReq = result.stderr
       matchReq.regex = messageRegex
-      match@StringUtils( matchReq )( matchRes )
+      find@StringUtils( matchReq )( matchRes )
+      //getting the uri of the document to be checked
+      indexOfReq = matchRes.group[1]
+      indexOfReq.word = "file:"
+      indexOf@StringUtils( indexOfReq )( indexOfRes )
+      subStrReq = matchRes.group[1]
+      subStrReq.begin = indexOfRes + 5
+      length@StringUtils( matchRes.group[1] )( subStrReq.end )
+      substring@StringUtils( subStrReq )( documentUri )
+      //line
+      l = int( matchRes.group[2] )
+      //severity
+      sev -> matchRes.group[3]
+
+      if ( sev == "error" ) {
+        s = 1
+      }
+
+      diagnosticParams << {
+        uri = documentUri
+        diagnostics << {
+          range << {
+            start << {
+              line = l-1
+              character = INTEGER_MAX_VALUE
+            }
+            end << {
+              line = l-1
+              character = INTEGER_MAX_VALUE
+            }
+          }
+          severity = s
+          source = "jolie"
+          message = matchRes.group[4]
+        }
+      }
+      publishDiagnostics@Client( diagnosticParams )
     }
-    valueToPrettyString@StringUtils( matchRes )( syntaxCheckResult )
   }
 }

@@ -7,8 +7,8 @@ include "exec.iol"
 execution{ concurrent }
 
 inputPort Input {
-  //Location: "socket://localhost:8080"
-  Location: Location_JolieLS
+  Location: "socket://localhost:8095"
+  //Location: Location_JolieLS
   Protocol: jsonrpc { .debug = true;
                       .transport="lsp"}
   Interfaces: Prova
@@ -18,7 +18,7 @@ init {
   println@Console("Started")()
 }
 
-main {
+min {
   initialize(req)(res) {
     println@Console("connessione avvenuta")()
   }
