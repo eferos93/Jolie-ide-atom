@@ -11,7 +11,7 @@ init {
   Client.location -> global.clientLocation
   println@Console( "Jolie-IDE Server Started" )()
   global.receivedShutdownReq = false
-
+  global.textDocumentSync = 1
 }
 
 main {
@@ -20,22 +20,18 @@ main {
       global.processId = initializeParams.processId
       global.rootUri = initializeParams.rootUri
       global.clientCapabilities << initializeParams.capabilities
-      //valueToPrettyString@StringUtils( initializeParams )( client )
-      //println@Console( client )()
-      with( serverCapabilities.capabilities ) {
-        .textDocumentSync = 1 //0 = none, 1 = full, 2 = incremental
-        with( .completionProvider ) {
-          .resolveProvider = false
-          .triggerCharacters[0] = "="
-          .triggerCharacters[1] = "."
-          .triggerCharacters[2] = "@"
-        };
-        .signatureHelpProvider.triggerCharacters[0] = "("
-        .definitionProvider = false
-        .hoverProvider = false
-        .documentSymbolProvider = false
-        .referenceProvider = false
-        //.experimental;
+      serverCapabilities.capabilities << {
+        textDocumentSync = global.textDocumentSync //0 = none, 1 = full, 2 = incremental
+        completionProvider << {
+          resolveProvider = false
+          triggerCharacters[0] = "@"
+        }
+        signatureHelpProvider.triggerCharacters[0] = "("
+        definitionProvider = true
+        hoverProvider = false
+        documentSymbolProvider = true
+        referenceProvider = false
+        //experimental;
       }
     }]
 
@@ -47,6 +43,7 @@ main {
         println@Console( "Shutdown request received..." )()
         global.receivedShutdownReq = true
     }]
+
     [ onExit( notification ) ] {
       if( !global.receivedShutdownReq ) {
         println@Console( "Did not received the shutdown request, exiting anyway..." )()
@@ -58,7 +55,6 @@ main {
     [ publishDiagnostics( diagnosticParams ) ] {
       println@Console( "publishing Diagnostics" )()
       publishDiagnostics@Client( diagnosticParams )
-
     }
 
     [ cancelRequest( cancelReq ) ] {

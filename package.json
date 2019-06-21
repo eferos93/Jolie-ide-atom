@@ -24,12 +24,17 @@
   "providedServices": {
     "autocomplete.provider": {
       "versions": {
-        "0.1.0": "provideAutocomplete"
+        "4.0.0": "provideAutocomplete"
       }
     },
     "outline-view": {
       "versions": {
         "0.1.0": "provideOutlines"
+      }
+    },
+    "definitions": {
+      "versions": {
+        "0.1.0": "provideDefinitions"
       }
     }
   },
@@ -42,6 +47,16 @@
     "atom-ide-busy-signal": {
       "versions": {
         "0.1.0": "consumeBusySignal"
+      }
+    },
+    "datatip": {
+      "versions": {
+        "0.1.0": "consumeDatatip"
+      }
+    },
+    "signature-help": {
+      "versions": {
+        "0.1.0": "consumeSignatureHelp"
       }
     }
   }

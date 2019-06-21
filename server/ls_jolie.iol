@@ -1,4 +1,5 @@
 include "types.iol"
+include "types/JavaException.iol"
 
 interface GeneralInterface {
   OneWay:
@@ -27,7 +28,6 @@ interface TextDocumentInterface {
 interface JavaServiceInterface {
   RequestResponse:
     documentSymbol( DocumentSymbolParams )( undefined ),
-    completion
 }
 
 interface WorkspaceInterface {
@@ -48,4 +48,18 @@ interface ServerToClient {
 interface SyntaxCheckerInterface {
   OneWay:
     syntaxCheck
+}
+
+interface InspectorInterface {
+  RequestResponse:
+  	inspectProgram( InspectionRequest )( ProgramInspectionResponse )
+      throws ParserException( WeakJavaExceptionType )
+             SemanticException( WeakJavaExceptionType )
+             FileNotFoundException( WeakJavaExceptionType )
+             IOException( WeakJavaExceptionType ),
+    inspectTypes( InspectionRequest )( TypesInspectionResponse )
+      throws ParserException( WeakJavaExceptionType )
+             SemanticException( WeakJavaExceptionType )
+             FileNotFoundException( WeakJavaExceptionType )
+             IOException( WeakJavaExceptionType )
 }

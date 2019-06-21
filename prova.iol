@@ -1,4 +1,0 @@
-interface Prova {
-RequestResponse: initialize
-                 
-}

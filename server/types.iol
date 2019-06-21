@@ -15,6 +15,7 @@ type WorkspaceFolder {
 
 type DocumentUri: string
 
+
 type TextDocumentIdentifier {
   uri: DocumentUri
 }
@@ -200,39 +201,39 @@ type ServerCapabilities {
 }
 
 type ExecuteCommandOptions {
-  /**
+  /*
    * The commands to be executed on the server
    */
   commands[1,*]: string
 }
 
 type DocumentLinkOptions {
-  /**
+  /*
 	 * Document links have a resolve provider as well
 	 */
 	resolveProvider?: bool
 }
 
 type RenameOptions {
-  /**
+  /*
    * Renames should be checked and tested before being executed
    */
   prepareProvider?: bool
 }
 
 type DocumentOnTypeFormattingOptions {
-  /**
+  /*
    * A character on which formatting should be triggered, like `}`
    */
   firstTriggerCharacter: string
-  /**
+  /*
    * More trigger characters
    */
   moreTriggerCharacter*: string
 }
 
 type CodeLensOptions {
-  /**
+  /*
 	 * Code lens has a resolve provider as well
 	 */
    resolveProvider?: bool
@@ -246,39 +247,39 @@ type SignatureHelpOptions {
 }
 
 type CompletionOptions {
-  /**
+  /*
 	 * The server provides support to resolve additional
 	 * information for a completion item
 	 */
    resolveProvider?: bool
-	/**
+	/*
 	 * The characters that trigger completion automatically
 	 */
    triggerCharacters*: string
 }
 
 type TextDocumentSyncOptions {
-  /**
+  /*
 	 * Open and close notifications are sent to the server If omitted open close notification should not
 	 * be sent
 	 */
   openClose?: bool
-  /**
+  /*
 	 * Change notifications are sent to the server See TextDocumentSyncKindNone, TextDocumentSyncKindFull
 	 * and TextDocumentSyncKindIncremental If omitted it defaults to TextDocumentSyncKindNone
 	 */
   change?: int
-  /**
+  /*
 	 * If present will save notifications are sent to the server If omitted the notification should not be
 	 * sent
 	 */
   willSave?: bool
-	/**
+	/*
 	 * If present will save wait until requests are sent to the server If omitted the request should not be
 	 * sent
 	 */
 	willSaveWaitUntil?: bool
-	/**
+	/*
 	 * If present save notifications are sent to the server If omitted the notification should not be
 	 * sent
 	 */
@@ -294,33 +295,33 @@ type DidOpenTextDocumentParams {
 }
 
 type TextDocumentItem {
-  /**
+  /*
 	 * The text document's URI
 	 */
 	uri: DocumentUri
-	/**
+	/*
 	 * The text document's language identifier
 	 */
 	languageId: string
-	/**
+	/*
 	 * The version number of this document (it will increase after each
 	 * change, including undo/redo)
 	 */
 	version: int
-	/**
+	/*
 	 * The content of the opened text document
 	 */
 	text: string
 }
 
 type DidChangeTextDocumentParams {
-  /**
+  /*
    * The document that did change The version number points
    * to the version after all provided content changes have
    * been applied
    */
-  textDocument: VersionedTextDocumentIdentifier //do
-	/**
+  textDocument: VersionedTextDocumentIdentifier
+	/*
 	 * The actual content changes The content changes describe single state changes
 	 * to the document So if there are two content changes c1 and c2 for a document
 	 * in state S then c1 move the document to S' and c2 to S''
@@ -329,15 +330,15 @@ type DidChangeTextDocumentParams {
 }
 
 type TextDocumentContentChangeEvent {
-  /**
+  /*
 	 * The range of the document that changed
 	 */
 	range?: Range
-	/**
+	/*
 	 * The length of the range that got replaced
 	 */
 	rangeLength?: int
-	/**
+	/*
 	 * The new text of the range/document
 	 */
 	text: string
@@ -349,12 +350,12 @@ type Range {
 }
 
 type Position {
-  /**
+  /*
 	 * Line position in a document (zero-based)
 	 */
 	line: int
 
-	/**
+	/*
 	 * Character offset on a line in a document (zero-based) Assuming that the line is
 	 * represented as a string, the `character` value represents the gap between the
 	 * `character` and `character + 1`
@@ -398,67 +399,73 @@ type CompletionParams {
 }
 
 type CompletionContext {
-  /**
+  /*
 	 * How the completion was triggered
    * CompletionTriggerKind: 1 = Invoked, 2 = TriggerCharacter,
    *                        3 = TriggerForIncompleteCompletions
 	 */
 	triggerKind: int
 
-	/**
+	/*
 	 * The trigger character (a single character) that has trigger code complete
 	 * Is undefined if `triggerKind !== CompletionTriggerKindTriggerCharacter`
 	 */
 	triggerCharacter?: string
 }
 
+type EmptyCompletionList {
+    isIncomplete: bool
+    items: void
+}
+
+type CompletionResult: CompletionList | EmptyCompletionList | void
+
 type CompletionList {
-  /**
+  /*
 	 * This list it not complete Further typing should result in recomputing
 	 * this list
 	 */
 	isIncomplete: bool
 
-	/**
+	/*
 	 * The completion items
 	 */
-	items {
-    _[1,*]: CompletionItem
-  }
+
+  items*: CompletionItem
 }
 
 type CompletionItem {
-  /**
+  /*
 	 * The label of this completion item By default
 	 * also the text that is inserted when selecting
 	 * this completion
 	 */
 	label: string
 
-	/**
+	/*
 	 * The kind of this completion item Based of the kind
 	 * an icon is chosen by the editor The standardized set
 	 * of available values is defined in `CompletionItemKind`
 	 */
 	kind?: int
 
-	/**
+	/*
 	 * A human-readable string with additional information
 	 * about this item, like type or symbol information
 	 */
 	detail?: string
 
-	/**
+	/*
 	 * A human-readable string that represents a doc-comment
 	 */
 	documentation?: string | MarkupContent
 
-	/**
+	/*
 	 * Indicates if this item is deprecated
 	 */
 	deprecated?: bool
 
-	/**
+	/*
 	 * Select this item when showing
 	 *
 	 * *Note* that only one completion item can be selected and that the
@@ -467,19 +474,19 @@ type CompletionItem {
 	 */
 	preselect?: bool
 
-	/**
+	/*
 	 * A string that should be used when comparing this item
 	 * with other items When `falsy` the label is used
 	 */
 	sortText?: string
 
-	/**
+	/*
 	 * A string that should be used when filtering a set of
 	 * completion items When `falsy` the label is used
 	 */
 	filterText?: string
 
-	/**
+	/*
 	 * A string that should be inserted into a document when selecting
 	 * this completion When `falsy` the label is used
 	 *
@@ -494,13 +501,13 @@ type CompletionItem {
 	 */
 	insertText?: string
 
-	/**
+	/*
 	 * The format of the insert text The format applies to both the `insertText` property
 	 * and the `newText` property of a provided `textEdit`
 	 */
 	insertTextFormat?: int //namespace: 1 = plainText, 2 = Snippet
 
-	/**
+	/*
 	 * An edit which is applied to a document when selecting this completion When an edit is provided the value of
 	 * `insertText` is ignored
 	 *
@@ -509,7 +516,7 @@ type CompletionItem {
 	 */
 	textEdit?: TextEdit
 
-	/**
+	/*
 	 * An optional array of additional text edits that are applied when
 	 * selecting this completion Edits must not overlap (including the same insert position)
 	 * with the main edit nor with themselves
@@ -520,28 +527,28 @@ type CompletionItem {
 	 */
 	additionalTextEdits?: TextEdit
 
-	/**
+	/*
 	 * An optional set of characters that when pressed while this completion is active will accept it first and
 	 * then type that character *Note* that all commit characters should have `length=1` and that superfluous
 	 * characters will be ignored
 	 */
 	commitCharacters*: string
 
-	/**
+	/*
 	 * An optional command that is executed *after* inserting this completion *Note* that
 	 * additional modifications to the current document should be described with the
 	 * additionalTextEdits-property
 	 */
 	command?: Command
 
-	/**
+	/*
 	 * A data entry field that is preserved on a completion item between
 	 * a completion and a completion resolve request
 	 */
 	data?: any
 }
 
-/**
+/*
  * A `MarkupContent` literal represents a string value which content is interpreted base on its
  * kind flag Currently the protocol supports `plaintext` and `markdown` as markup kinds
  *
@@ -576,15 +583,13 @@ type Command {
   arguments*: undefined
 }
 
-type CompletionResult: CompletionItem | CompletionList | void //CompletionItem[1,*]
-
 type DidChangeWatchedFilesParams {
   changes[1,*]: FileEvent
 }
 
 type FileEvent {
   uri: DocumentUri
-  /**
+  /*
    * 1 = created, 2 = Changed, 3 = Deleted
    */
   type: int
@@ -608,19 +613,19 @@ type WorkspaceSymbolParams {
 }
 
 type SymbolInformation | void {
-  /**
+  /*
 	 * The name of this symbol
 	 */
 	name: string
-	/**
+	/*
 	 * The kind of this symbol
 	 */
 	kind: int
-	/**
+	/*
 	 * Indicates if this symbol is deprecated
 	 */
 	deprecated?: bool
-	/**
+	/*
 	 * The location of this symbol The location's range is used by a tool
 	 * to reveal the location in the editor If the symbol is selected in the
 	 * tool the range's start information is used to position the cursor So
@@ -633,7 +638,7 @@ type SymbolInformation | void {
 	 */
 	location: Location
 
-	/**
+	/*
 	 * The name of the symbol containing this symbol This information is for
 	 * user interface purposes (eg to render a qualifier in the user interface
 	 * if necessary) It can't be used to re-infer a hierarchy for the document
@@ -666,13 +671,17 @@ type MarkSt {
   value: string
 }
 
-type PublishDiagnosticParams {
+type DiagnosticParams {
   uri: DocumentUri
   diagnostics*: Diagnostic | void
-  /*diagnostics {
-      _[1,*]: Diagnostic | void
-  }*/
 }
+
+type EmptyDiagnosticParams {
+  uri: DocumentUri
+  diagnostics: void
+}
+
+type PublishDiagnosticParams: DiagnosticParams | EmptyDiagnosticParams
 
 type Diagnostic {
   range: Range
@@ -690,4 +699,69 @@ type DiagnosticRelatedInformation {
 
 type DocumentSymbolParams {
   textDocument: TextDocumentIdentifier
+}
+
+type TypeInfoType {
+  rootType: string
+  name?: string
+  code?: string
+  isNative: bool
+  undefinedSubtypes?: bool
+  documentation?: string
+  subtype*: TypeInfoType
+} | void {
+  isChoice: bool
+  name?: string
+  code?: string
+  isNative: bool
+  undefinedSubtypes?: bool
+  documentation?: string
+  subtype*: TypeInfoType
+}
+
+type FaultInfoType {
+  name: string
+  faultType: TypeInfoType
+}
+
+type OperationInfoType {
+  name: string
+  requestType: TypeInfoType
+  responseType?: TypeInfoType
+  fault*: FaultInfoType
+  documentation?: string
+}
+
+type InterfaceInfoType{
+  name: string
+  operation*: OperationInfoType
+  documentation?: string
+}
+
+type PortInfoType{
+  name: string
+  location?: undefined //temporary fix: type should be string
+  protocol?: string
+  interface*: InterfaceInfoType
+  isOutput: bool
+  documentation?: string
+  subtype*: TypeInfoType
+}
+
+type ProgramInspectionResponse{
+  port*: PortInfoType
+}
+
+type TypesInspectionResponse{
+  type*: TypeInfoType
+}
+
+type InspectionRequest {
+  filename: string
+  source?: string
+}
+
+type Snippet: string {
+  prefix: string
+  body: string
 }

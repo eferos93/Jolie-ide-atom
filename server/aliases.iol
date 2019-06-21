@@ -1,7 +1,7 @@
 include "ls_jolie.iol"
 
 constants {
-  Location_JolieLS = "socket://localhost:8080"
+  Location_JolieLS = ""
 }
 
 outputPort TextDocument {

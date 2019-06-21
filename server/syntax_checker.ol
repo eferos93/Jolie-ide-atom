@@ -29,16 +29,11 @@ main {
     cmd.stdOutConsoleEnable = true
     cmd.waitFor = 1
     exec@Exec( cmd )( result )
-    valueToPrettyString@StringUtils( result )( str )
-    println@Console( str )()
     if ( result.exitCode == 0 ) {
       diagnosticParams << {
         uri = document.path
         diagnostics = void
       }
-      valueToPrettyString@StringUtils( diagnosticParams )( diagString )
-      println@Console( diagString )()
-
       publishDiagnostics@Client( diagnosticParams )
       println@Console( "SyntaxChecker ended: no errors" )()
     } else {
