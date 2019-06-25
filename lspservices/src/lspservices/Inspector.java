@@ -209,7 +209,7 @@ public class Inspector extends JavaService {
 		Value returnValue = Value.create();
 		ValueVector ports = ValueVector.create();
 		returnValue.children().put( ProgramInfoType.PORT, ports );
-
+                
 		for ( InputPortInfo portInfo : inspector.getInputPorts() ) {
 			ports.add( buildPortInfo( portInfo, inspector ) );
 		}

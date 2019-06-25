@@ -218,8 +218,8 @@ main {
     */
   [ completion( completionParams )( completionRes ) {
 
-      reqSnippet = "( ${1:requestVar} )"
-      resSnippet = ""
+      //reqSnippet = "( ${1:requestVar} )"
+      //resSnippet = ""
       completionRes << {
         isIncomplete = false
       }
@@ -239,9 +239,9 @@ main {
       if ( docFound ) {
         document -> global.textDocument[documentFoundIndex]
         //valueToPrettyString@StringUtils( document )( s )
-      } //TODO else
+        println@Console( "document found" )(  )
+      } //TODO else, exception might be the best
 
-      if ( is_defined( context.triggerCharacter ) ) {
         triggerChar -> context.triggerCharacter
         program -> document.jolieProgram
         op = document.result[position.line]
@@ -255,9 +255,24 @@ main {
 
               if ( is_defined( iFace.operation ) ) {
                 for( op in iFace.operation ) {
+                  if ( !is_defined( triggerChar ) ) {
+                    temp = op.name
+                    temp.substring = operationName
+                    contains@StringUtils( temp )( operationFound )
+                    if ( operationFound ) {
+                      snippet = op.name + "@" + port.name
+                      label = snippet
+                      kind = 2 //method
 
-                  if ( op.name == operationName ) {
-                    //build the snippet
+                    }
+                  } else {
+                    operationFound = ( op.name == operationName )
+                    label = port.name
+                    snippet = label
+                    kind = 7
+                  }
+                  if ( operationFound ) {
+                    //build the rest of the snippet to be sent
                     if ( is_defined( op.responseType ) ) {
                       //is a reqRes operation
 
@@ -269,10 +284,13 @@ main {
 
                       if ( is_defined( op.responseType.name ) ) {
                         resVar = op.responseType.name
+                        if ( resVar == "void" ) {
+                          resVar = ""
+                        }
                       } else {
                         resVar = "responseVar"
                       }
-                      snippet = "( ${1:" + reqVar + "} )( ${2:" + resVar + "} )"
+                      snippet += "( ${1:" + reqVar + "} )( ${2:" + resVar + "} )"
                     } else {
                       //is a OneWay operation
                       if ( is_defined( op.requestType.name ) ) {
@@ -286,9 +304,9 @@ main {
                     portFound = true
                     completionRes << {
                       items[#completionRes.items] << {
-                        label = port.name
-                        kind = 7
-                        insertText = port.name + snippet
+                        label = label
+                        kind = kind
+                        insertText = snippet
                         insertTextFormat = 2 //snippet
                       }
                     }
@@ -298,7 +316,6 @@ main {
             }
           }
         }
-      } //TODO triggerKind == 1 and == 0
 
       if ( !foundPort ) {
         completionRes.items = void
@@ -310,7 +327,93 @@ main {
   } ]
 
   [ hover( hoverReq )( hoverResp ) {
+      hoverResp = void
       println@Console( "hover req received.." )()
-      //TODO
+
+      line = global.textDocument.result[hoverReq.position.line]
+      textDocUri -> hoverReq.textDocument.uri
+      //see definitions on top
+      searchDoc
+
+      if ( docFound ) {
+        document -> global.textDocument[documentFoundIndex]
+      } //TODO else
+
+      program -> document.jolieProgram
+      trim@StringUtils( line )( trimmedLine )
+      trimmedLine.regex = "([A-z]+)@([A-z]+)\\(.*"
+      //.group[1] is operaion name, .group[2] port name
+      find@StringUtils( trimmedLine )( findRes )
+      if ( findRes == 0 ) {
+        trimmedLine.regex = "\\[? ?( ?[A-z]+ ?)\\( ?[A-z]* ?\\)\\(? ?[A-z]* ?\\)? ?\\]? ?\\{?"
+        //in this case, we have only
+        find@StringUtils( trimmedLine )( findRes )
+      }
+      //if we found somenthing, we have to send a hover item, otherwise void
+      if ( findRes == 1 ) {
+        // portName might not existing
+        portName -> findRes.group[2]
+        operationName -> findRes.group[1]
+        undef( trimmedLine.regex )
+        hoverInfo = "```jolie\n" + operationName + "@"
+        for ( port in program.port ) {
+
+          if ( is_defined( portName ) ) {
+            ifGuard = port.name == portName && is_defined( port.interface )
+            hoverInfo += portName
+          } else {
+            ifGuard = is_defined( port.interface )
+          }
+
+          if ( ifGuard ) {
+            for ( iFace in port.interface ) {
+              if ( is_defined( iFace.operation ) ) {
+                for ( op in iFace.operation ) {
+                  if ( op.name == operationName ) {
+                    if ( !is_defined( portName ) ) {
+                      hoverInfo += port.name
+                    }
+                    reqType = op.requestType.name
+                    resType = ""
+                    if ( is_defined( op.responseType ) ) {
+                      resType = op.responseType.name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        hoverInfo += "( " + reqType + " )"
+        //build the info
+        if ( resType != "" ) {
+          //the operation is a RR
+          hoverInfo += "( " + resType + " )"
+        }
+
+        hoverInfo += "\n```\n**ADD DOCUMENTATION HERE**"
+
+        //computing the range
+        length@StringUtils( line )( endCharPos )
+        line.word = trimmedLine
+        indexOf@StringUtils( line )( startChar )
+
+        hoverResp.range << {
+          start << {
+            line = hoverReq.position.line
+            character = startChar
+          }
+          end << {
+            line = hoverReq.position.line
+            character = endCharPos
+          }
+        }
+
+        hoverResp.contents << {
+          kind = "markdown"
+          value = hoverInfo
+        }
+      }
   } ]
 }

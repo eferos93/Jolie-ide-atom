@@ -21,7 +21,7 @@ interface TextDocumentInterface {
   RequestResponse:
     willSaveWaitUntil( WillSaveTextDocumentParams )( WillSaveWaitUntilResponse ),
     completion( CompletionParams )( CompletionResult ),
-    hover( TextDocumentPositionParams )( Hover ),
+    hover( TextDocumentPositionParams )( HoverInformations ),
     documentSymbol( DocumentSymbolParams )( undefined )
 }
 

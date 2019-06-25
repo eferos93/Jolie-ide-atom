@@ -12,6 +12,7 @@ init {
   println@Console( "Jolie-IDE Server Started" )()
   global.receivedShutdownReq = false
   global.textDocumentSync = 1
+  
 }
 
 main {
@@ -28,7 +29,7 @@ main {
         }
         signatureHelpProvider.triggerCharacters[0] = "("
         definitionProvider = true
-        hoverProvider = false
+        hoverProvider = true
         documentSymbolProvider = true
         referenceProvider = false
         //experimental;
@@ -37,6 +38,7 @@ main {
 
     [ initialized( initializedParams ) ] {
       println@Console( "Initialization done " )()
+
     }
 
     [ shutdown( req )( res ) {

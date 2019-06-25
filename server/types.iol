@@ -659,10 +659,14 @@ type ExecuteCommandParams {
 
 type ExecuteCommandResult: undefined
 
+
+
 type Hover {
   contents[1,*]: MarkedString | MarkupContent
   range?: Range
 }
+
+type HoverInformations: Hover | void
 
 type MarkedString: string | MarkSt
 
