@@ -22,7 +22,7 @@ outputPort Client {
 main {
   [ syntaxCheck( document ) ] {
     println@Console( "syntaxChecker started for " + document.path )()
-
+    
     cmd = "jolie"
     cmd.args[0] = "--check"
     cmd.args[1] = document.path

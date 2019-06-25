@@ -239,12 +239,66 @@ type CodeLensOptions {
    resolveProvider?: bool
 }
 type SignatureHelpOptions {
-  /**
+  /*
    * The characters that trigger signature help
    * automatically
    */
   triggerCharacters*: string
 }
+
+
+type ParameterInformation {
+  /*
+	 * The label of this parameter information.
+	 *
+	 * Either a string or an inclusive start and exclusive end offsets within its containing
+	 * signature label. (see SignatureInformation.label). The offsets are based on a UTF-16
+	 * string representation as `Position` and `Range` does.
+	 *
+	 * *Note*: a label of type string should be a substring of its containing signature label.
+	 * Its intended use case is to highlight the parameter label part in the `SignatureInformation.label`.
+	 */
+  label: string | void { _2: int } //string | [int, int]
+  /*
+	 * The human-readable doc-comment of this parameter. Will be shown
+	 * in the UI but can be omitted.
+	 */
+  documentation?: string | MarkupContent
+}
+
+type SignatureInformation {
+  label: string
+  documentation?: string | MarkupContent
+  parameters*: ParameterInformation
+}
+
+type SignatureHelp {
+  signatures[1,*]: SignatureInformation
+  /*
+	 * The active signature. If omitted or the value lies outside the
+	 * range of `signatures` the value defaults to zero or is ignored if
+	 * `signatures.length === 0`. Whenever possible implementors should
+	 * make an active decision about the active signature and shouldn't
+	 * rely on a default value.
+	 * In future version of the protocol this property might become
+	 * mandatory to better express this.
+	 */
+  activeSignature?: int
+  /*
+	 * The active parameter of the active signature. If omitted or the value
+	 * lies outside the range of `signatures[activeSignature].parameters`
+	 * defaults to 0 if the active signature has parameters. If
+	 * the active signature has no parameters it is ignored.
+	 * In future version of the protocol this property might become
+	 * mandatory to better express the active parameter if the
+	 * active signature does have any.
+	 */
+  activeParameter?: int
+}
+
+type SignatureHelpResponse: SignatureHelp | void
+
+
 
 type CompletionOptions {
   /*
@@ -768,4 +822,12 @@ type InspectionRequest {
 type Snippet: string {
   prefix: string
   body: string
+}
+
+type TextDocument {
+  uri: string
+  lines*: string
+  source: string
+  version: int
+  jolieProgram?: undefined
 }

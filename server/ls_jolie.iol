@@ -22,7 +22,8 @@ interface TextDocumentInterface {
     willSaveWaitUntil( WillSaveTextDocumentParams )( WillSaveWaitUntilResponse ),
     completion( CompletionParams )( CompletionResult ),
     hover( TextDocumentPositionParams )( HoverInformations ),
-    documentSymbol( DocumentSymbolParams )( undefined )
+    documentSymbol( DocumentSymbolParams )( undefined ),
+    signatureHelp( TextDocumentPositionParams )( SignatureHelpResponse )
 }
 
 interface JavaServiceInterface {
@@ -57,9 +58,19 @@ interface InspectorInterface {
              SemanticException( WeakJavaExceptionType )
              FileNotFoundException( WeakJavaExceptionType )
              IOException( WeakJavaExceptionType ),
-    inspectTypes( InspectionRequest )( TypesInspectionResponse )
+             inspectTypes( InspectionRequest )( TypesInspectionResponse )
       throws ParserException( WeakJavaExceptionType )
              SemanticException( WeakJavaExceptionType )
              FileNotFoundException( WeakJavaExceptionType )
              IOException( WeakJavaExceptionType )
+}
+
+interface UtilsInterface {
+  RequestResponse:
+    getDocument( string )( TextDocument )
+  OneWay:
+    insertNewDocument( DidOpenTextDocumentParams ),
+    updateDocument( DidChangeTextDocumentParams ),
+    deleteDocument( DidCloseTextDocumentParams )
+
 }

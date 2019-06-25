@@ -12,7 +12,6 @@ init {
   println@Console( "Jolie-IDE Server Started" )()
   global.receivedShutdownReq = false
   global.textDocumentSync = 1
-  
 }
 
 main {
@@ -27,7 +26,7 @@ main {
           resolveProvider = false
           triggerCharacters[0] = "@"
         }
-        signatureHelpProvider.triggerCharacters[0] = "("
+        //signatureHelpProvider.triggerCharacters[0] = "("
         definitionProvider = true
         hoverProvider = true
         documentSymbolProvider = true

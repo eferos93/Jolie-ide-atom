@@ -498,7 +498,11 @@ public class Inspector extends JavaService {
 		}
 		String returnString = TYPE_CARDINALITY_OPEN + min;
 		if ( min != max ) {
-			returnString += TYPE_CARDINALITY_SEPARATOR + max;
+                        if ( max == Integer.MAX_VALUE ) {
+                                returnString += TYPE_CARDINALITY_SEPARATOR + TYPE_CARDINALITY_ZERO_TO_MANY;
+                        } else {
+                                returnString += TYPE_CARDINALITY_SEPARATOR + max;
+                        }
 		}
 		return returnString + TYPE_CARDINALITY_CLOSE;
 	}
