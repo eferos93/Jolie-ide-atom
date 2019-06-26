@@ -1,5 +1,8 @@
 include "types.iol"
-
+include "types/JavaException.iol"
+/*
+ * @author Eros Fabrici
+ */
 interface GeneralInterface {
   OneWay:
     initialized( InitializedParams ),
@@ -19,7 +22,15 @@ interface TextDocumentInterface {
     didClose( DidCloseTextDocumentParams )
   RequestResponse:
     willSaveWaitUntil( WillSaveTextDocumentParams )( WillSaveWaitUntilResponse ),
-    completion( CompletionParams )( CompletionResult )
+    completion( CompletionParams )( CompletionResult ),
+    hover( TextDocumentPositionParams )( HoverInformations ),
+    documentSymbol( DocumentSymbolParams )( undefined ),
+    signatureHelp( TextDocumentPositionParams )( SignatureHelpResponse )
+}
+
+interface JavaServiceInterface {
+  RequestResponse:
+    documentSymbol( DocumentSymbolParams )( undefined ),
 }
 
 interface WorkspaceInterface {
@@ -28,6 +39,40 @@ interface WorkspaceInterface {
     didChangeWorkspaceFolders( DidChangeWorkspaceFoldersParams ),
     didChangeConfiguration( DidChangeConfigurationParams )
   RequestResponse:
-    symbol( WorkspaceSymbolParams )( SymbolInformation ),
+    documentSymbol( WorkspaceSymbolParams )( undefined ),
     executeCommand( ExecuteCommandParams )( ExecuteCommandResult )
+}
+
+interface ServerToClient {
+  OneWay:
+    publishDiagnostics( PublishDiagnosticParams )
+}
+
+interface SyntaxCheckerInterface {
+  OneWay:
+    syntaxCheck
+}
+
+interface InspectorInterface {
+  RequestResponse:
+  	inspectProgram( InspectionRequest )( ProgramInspectionResponse )
+      throws ParserException( WeakJavaExceptionType )
+             SemanticException( WeakJavaExceptionType )
+             FileNotFoundException( WeakJavaExceptionType )
+             IOException( WeakJavaExceptionType ),
+             inspectTypes( InspectionRequest )( TypesInspectionResponse )
+      throws ParserException( WeakJavaExceptionType )
+             SemanticException( WeakJavaExceptionType )
+             FileNotFoundException( WeakJavaExceptionType )
+             IOException( WeakJavaExceptionType )
+}
+
+interface UtilsInterface {
+  RequestResponse:
+    getDocument( string )( TextDocument )
+  OneWay:
+    insertNewDocument( DidOpenTextDocumentParams ),
+    updateDocument( DocumentModifications ),
+    deleteDocument( DidCloseTextDocumentParams )
+
 }

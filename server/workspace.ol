@@ -3,7 +3,10 @@ include "ls_jolie.iol"
 include "string_utils.iol"
 include "runtime.iol"
 include "exec.iol"
-
+/*
+ * atom doesn't support workspace/ lsp messages so this is just a skeleton
+ * of the service
+ */
 execution{ concurrent }
 
 inputPort WorkspaceInput {
@@ -11,6 +14,10 @@ inputPort WorkspaceInput {
   Interfaces: WorkspaceInterface
 }
 
+/*
+ * @author Eros Fabrici
+ */
+ 
 init {
   println@Console( "workspace running" )()
 }
@@ -38,14 +45,7 @@ main {
   [ didChangeConfiguration( notification ) ] {
       valueToPrettyString@StringUtils( notification )(res)
       println@Console("didChangeConfiguration received " + res)()
-      //TODO
   }
-
-  [ symbol( symbolRequest )( symbolResponse ) {
-      valueToPrettyString@StringUtils( symbolReq )(res)
-      println@Console( "symbolReq received " + res )()
-      //TODO
-  } ]
 
   [ executeCommand( commandParams )( commandResult ) {
       cmd -> commandParams.commandParams

@@ -2,75 +2,76 @@ include "console.iol"
 include "string_utils.iol"
 include "runtime.iol"
 
-execution{ concurrent }
+/*
+ * Main Service that communicates directly with the client and provides the basic
+ * operations
+ * The port is defined in aliases.iol
+ */
+execution { concurrent }
 
 include "aliases.iol"
 
-
+/*
+ * @author Eros Fabrici
+ */
 init {
-  println@Console("Jolie Language Server Started")()
+  Client.location -> global.clientLocation
+  println@Console( "Jolie-IDE Server Started" )()
   global.receivedShutdownReq = false
+  //we want full document sync as we build the ProgramInspector for each
+  //time we modify the document
+  global.textDocumentSync = 1
 }
 
 main {
-  [ initialize( initializeParams )( serverCapabilities ) {
-    println@Console( "connessione avvenuta" )()
-    global.processId = initializeParams.processId
-    global.rootUri = initializeParams.rootUri
-    global.clientCapabilities << initializeParams.capabilities
-    println@Console( "Process ID: " + global.processId )()
-    println@Console( "Root Uri: " + global.rootUri )()
-    with( serverCapabilities.capabilities ) {
-      .textDocumentSync = 2
-      with( .completionProvider ) {
-        //.resolveProvider = true;
-        .triggerCharacters[0] = "="
-        .triggerCharacters[1] = "."
-        //.triggerCharacters[2] = "A-Za-z0-9";
-      };
-      //.signatureHelpProvider.triggerCharacters[0] = "(";
-      //.definitionProvider = true;
-      //.typeDefinitionProvider = true;
-      //.implementationProvider = true;
-      //.referenceProvider = true;
-      //.documentHighlightProvider = false;
-      //.workspaceSymbolProvider = false;
-      //.documentSymbolProvider = false;
-      //.codeActionProvider = false;
-      //.codeLensProvider = false;
-      //.documentFormattingProvider = false;
-      //.documentOnTypeFormattingrvider;
-      //.renameProvider = false;
-      //.documentLinkProvider;
-      //.colorProvider = false;
-      //.foldingRangeProvider = false;
-      //.declarationProvider = false;
-      //.executeCommandProvider;
-      with( .workspace.workspaceFolders ) {
-        .supported = true
-        .changeNotifications = true
+    [ initialize( initializeParams )( serverCapabilities ) {
+      println@Console( "Initialize message received" )()
+      global.processId = initializeParams.processId
+      global.rootUri = initializeParams.rootUri
+      global.clientCapabilities << initializeParams.capabilities
+      //for full serverCapabilities spec, see
+      // https://microsoft.github.io/language-server-protocol/specification
+      // and types.iol
+      serverCapabilities.capabilities << {
+        textDocumentSync = global.textDocumentSync //0 = none, 1 = full, 2 = incremental
+        completionProvider << {
+          resolveProvider = false
+          triggerCharacters[0] = "@"
+        }
+        //signatureHelpProvider.triggerCharacters[0] = "("
+        definitionProvider = true
+        hoverProvider = true
+        documentSymbolProvider = true
+        referenceProvider = false
+        //experimental;
       }
-      //.experimental;
+    }]
+
+    [ initialized( initializedParams ) ] {
+      println@Console( "Initialization done " )()
+
     }
-  }]
 
-  [ shutdown( req )( res ) {
-    println@Console( "Shutdown request received..." )()
-    global.receivedShutdownReq = true
-  }]
+    [ shutdown( req )( res ) {
+        println@Console( "Shutdown request received..." )()
+        global.receivedShutdownReq = true
+    }]
 
-  [ onExit( notification ) ] {
-    if( global.receivedShutdownReq ) {
+    [ onExit( notification ) ] {
+      if( !global.receivedShutdownReq ) {
+        println@Console( "Did not receive the shutdown request, exiting anyway..." )()
+      }
+      println@Console( "Exiting Jolie Language server..." )()
       exit
-      //callExit@Runtime(0)()
-    } else {
-      println@Console( "Did not received the shutdown request, exiting anyway..." )()
-      exit
-      //callExit@Runtime(1)()
     }
-  }
+    //received from syntax_checker.ol
+    [ publishDiagnostics( diagnosticParams ) ] {
+      println@Console( "publishing Diagnostics" )()
+      publishDiagnostics@Client( diagnosticParams )
+    }
 
-  [ initialized( initializedParams ) ] {
-    println@Console( "Initialized " )()
-  }
+    [ cancelRequest( cancelReq ) ] {
+        println@Console( "cancelRequest received ID: " + cancelReq.id )()
+        //TODO
+    }
 }
