@@ -7,6 +7,7 @@ A language client plug-in for atom + the language server written in Jolie
 * Text Synchronization
 * Completion for operations/ports
 * Diagnostics
+* Hover Informations
 
 # In progress
 
