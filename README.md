@@ -1,15 +1,19 @@
-#Jolie Ide for Atom
+# Jolie Ide for Atom
 
 A language client plug-in for atom + the language server written in Jolie
 
-#Features so far working
+# Features so far working
 
-*Text Synchronization
-*Completion for operations/ports
-*Diagnostics
+* Text Synchronization
+* Completion for operations/ports
+* Diagnostics
 
-#In progress
+# In progress
 
-*signatureHelp
+* signatureHelp
 
-Note: the socket is allocated statically by the client, check lib/main.js
+# Note:
+
+* the socket is allocated statically by the client, check lib/main.js
+* tested only in Linux environment
+* Requires the last version of Jolie downloadable from the [Jolie rep](https://github.com/jolie/jolie)
