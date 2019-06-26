@@ -18,7 +18,9 @@ outputPort Client {
   location: "local://Client"
   Interfaces: ServerToClient
 }
-
+/*
+ * @author Eros Fabrici
+ */
 main {
   [ syntaxCheck( document ) ] {
     println@Console( "syntaxChecker started for " + document.path )()

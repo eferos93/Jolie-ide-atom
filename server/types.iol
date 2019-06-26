@@ -3,7 +3,9 @@
  * see https://microsoft.github.io/language-server-protocol/specification
  * for more info
  */
-
+ /*
+  * @author Eros Fabrici
+  */
 type InitializeParams {
   processId: int | void
   rootPath?: string | void

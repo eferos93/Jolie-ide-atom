@@ -42,8 +42,7 @@ outputPort Utils {
 
 
 /*
- * INIT and MAIN
- *
+ * @author Eros Fabrici
  */
 init {
   println@Console( "txtDoc running" )()

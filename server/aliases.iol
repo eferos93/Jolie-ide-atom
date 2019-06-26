@@ -1,5 +1,7 @@
 include "ls_jolie.iol"
-
+/*
+ * @author Eros Fabrici
+ */
 //location sent by the client
 constants {
   Location_JolieLS = ""

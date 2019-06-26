@@ -11,7 +11,9 @@ execution { concurrent }
 
 include "aliases.iol"
 
-
+/*
+ * @author Eros Fabrici
+ */
 init {
   Client.location -> global.clientLocation
   println@Console( "Jolie-IDE Server Started" )()

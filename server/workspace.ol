@@ -14,6 +14,10 @@ inputPort WorkspaceInput {
   Interfaces: WorkspaceInterface
 }
 
+/*
+ * @author Eros Fabrici
+ */
+ 
 init {
   println@Console( "workspace running" )()
 }

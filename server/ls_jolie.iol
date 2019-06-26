@@ -1,6 +1,8 @@
 include "types.iol"
 include "types/JavaException.iol"
-
+/*
+ * @author Eros Fabrici
+ */
 interface GeneralInterface {
   OneWay:
     initialized( InitializedParams ),

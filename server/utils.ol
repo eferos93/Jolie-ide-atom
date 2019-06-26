@@ -31,6 +31,10 @@ embedded {
   Java: "lspservices.Inspector" in JavaServiceInspector
 }
 
+/*
+ * @author Eros Fabrici
+ */
+ 
 define inspect
 {
   scope( inspection ) {
