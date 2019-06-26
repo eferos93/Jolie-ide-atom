@@ -20,7 +20,7 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
-    "atom-languageclient":"^0.9.9",
+    "atom-languageclient": "^0.9.9",
     "atom-package-deps": "^5.0.0"
   },
   "package-deps": [
