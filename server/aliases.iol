@@ -1,5 +1,6 @@
 include "ls_jolie.iol"
 
+//location sent by the client
 constants {
   Location_JolieLS = ""
 }
@@ -15,7 +16,8 @@ outputPort Workspace {
 embedded {
   Jolie: "text_document.ol" in TextDocument,
          "workspace.ol" in Workspace,
-         "syntax_checker.ol"
+         "syntax_checker.ol",
+         "utils.ol"
 }
 
 inputPort Input {
@@ -24,7 +26,7 @@ inputPort Input {
   Protocol: jsonrpc { //.debug = true
                       clientLocation -> global.clientLocation
                       clientOutputPort = "Client"
-                      transport="lsp"
+                      transport = "lsp"
                       osc.onExit.alias = "exit"
                       osc.cancelRequest.alias = "$/cancelRequest"
                       osc.didOpen.alias = "textDocument/didOpen"
@@ -36,6 +38,7 @@ inputPort Input {
                       osc.hover.alias = "textDocument/hover"
                       osc.publishDiagnostics.alias = "textDocument/publishDiagnostics"
                       osc.publishDiagnostics.isNullable = true
+                      osc.signatureHelp.alias = "textDocument/signatureHelp"
                       osc.didChangeWatchedFiles.alias = "workspace/didChangeWatchedFiles"
                       osc.didChangeWorkspaceFolders.alias = "workspace/didChangeWorkspaceFolders"
                       osc.didChangeConfiguration.alias = "workspace/didChangeConfiguration"
@@ -46,6 +49,10 @@ inputPort Input {
   Aggregates: TextDocument, Workspace
 }
 
+
+/*
+ * port that points to the client, used for publishing diagnostics
+ */
 outputPort Client {
   Protocol: jsonrpc {
     transport = "lsp"
@@ -53,6 +60,9 @@ outputPort Client {
   Interfaces: ServerToClient
 }
 
+/*
+ * port in which we receive the messages to be forwarded to the client
+ */
 inputPort NotificationsToClient {
   Location: "local://Client"
   interfaces: ServerToClient

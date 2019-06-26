@@ -13,3 +13,4 @@ server_temp.ol
 /lspservices/dist/
 /lspservices/build/
 NetBeans test config
+/server/syntax_checker.ol

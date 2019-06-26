@@ -2,6 +2,11 @@ include "console.iol"
 include "string_utils.iol"
 include "runtime.iol"
 
+/*
+ * Main Service that communicates directly with the client and provides the basic
+ * operations
+ * The port is defined in aliases.iol
+ */
 execution { concurrent }
 
 include "aliases.iol"
@@ -11,6 +16,8 @@ init {
   Client.location -> global.clientLocation
   println@Console( "Jolie-IDE Server Started" )()
   global.receivedShutdownReq = false
+  //we want full document sync as we build the ProgramInspector for each
+  //time we modify the document
   global.textDocumentSync = 1
 }
 
@@ -20,6 +27,9 @@ main {
       global.processId = initializeParams.processId
       global.rootUri = initializeParams.rootUri
       global.clientCapabilities << initializeParams.capabilities
+      //for full serverCapabilities spec, see
+      // https://microsoft.github.io/language-server-protocol/specification
+      // and types.iol
       serverCapabilities.capabilities << {
         textDocumentSync = global.textDocumentSync //0 = none, 1 = full, 2 = incremental
         completionProvider << {
@@ -47,12 +57,12 @@ main {
 
     [ onExit( notification ) ] {
       if( !global.receivedShutdownReq ) {
-        println@Console( "Did not received the shutdown request, exiting anyway..." )()
+        println@Console( "Did not receive the shutdown request, exiting anyway..." )()
       }
       println@Console( "Exiting Jolie Language server..." )()
       exit
     }
-
+    //received from syntax_checker.ol
     [ publishDiagnostics( diagnosticParams ) ] {
       println@Console( "publishing Diagnostics" )()
       publishDiagnostics@Client( diagnosticParams )

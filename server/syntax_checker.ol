@@ -22,7 +22,7 @@ outputPort Client {
 main {
   [ syntaxCheck( document ) ] {
     println@Console( "syntaxChecker started for " + document.path )()
-    
+
     cmd = "jolie"
     cmd.args[0] = "--check"
     cmd.args[1] = document.path
@@ -40,14 +40,19 @@ main {
       //if we have an error we apply a regex to get error message and line
       messageRegex = "\\s*(.+):\\s*(\\d+):\\s*(error|warning)\\s*:\\s*(.+)"
       matchReq = result.stderr
+      println@Console( matchReq )(  )
       matchReq.regex = messageRegex
       find@StringUtils( matchReq )( matchRes )
       //getting the uri of the document to be checked
+      //have to do this because the inspector, when returning an error,
+      //returns an uri that looks the following:
+      // /home/eferos93/.atom/packages/Jolie-ide-atom/server/file:/home/eferos93/.atom/packages/Jolie-ide-atom/server/utils.ol
+      //same was with jolie --check
       indexOfReq = matchRes.group[1]
       indexOfReq.word = "file:"
       indexOf@StringUtils( indexOfReq )( indexOfRes )
       subStrReq = matchRes.group[1]
-      subStrReq.begin = indexOfRes + 5
+      subStrReq.begin = indexOfRes + 5 //length of "file:"
       length@StringUtils( matchRes.group[1] )( subStrReq.end )
       substring@StringUtils( subStrReq )( documentUri )
       //line

@@ -70,7 +70,7 @@ interface UtilsInterface {
     getDocument( string )( TextDocument )
   OneWay:
     insertNewDocument( DidOpenTextDocumentParams ),
-    updateDocument( DidChangeTextDocumentParams ),
+    updateDocument( DocumentModifications ),
     deleteDocument( DidCloseTextDocumentParams )
 
 }

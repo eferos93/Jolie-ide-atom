@@ -1,3 +1,9 @@
+/*
+ * all the types used in the Server
+ * see https://microsoft.github.io/language-server-protocol/specification
+ * for more info
+ */
+
 type InitializeParams {
   processId: int | void
   rootPath?: string | void
@@ -830,4 +836,10 @@ type TextDocument {
   source: string
   version: int
   jolieProgram?: undefined
+}
+
+type DocumentModifications {
+  version: int
+  uri: string
+  text: string
 }

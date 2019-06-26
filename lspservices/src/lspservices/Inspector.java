@@ -1,24 +1,4 @@
-/***************************************************************************
- *   Copyright (C) 2019 by Saverio Giallorenzo                             *
- *   Copyright (C) 2019 by Eros Fabrici <eros.fabrici@gmail.com>           *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU Library General Public License as       *
- *   published by the Free Software Foundation; either version 2 of the    *
- *   License, or (at your option) any later version.                       *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU Library General Public     *
- *   License along with this program; if not, write to the                 *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- *                                                                         *
- *   For details about the authors of this software, see the AUTHORS file. *
- ***************************************************************************/
+
 package lspservices;
 
 
@@ -61,11 +41,12 @@ import jolie.runtime.embedding.RequestResponse;
 
 /**
  *
- * @author Saverio Gianlorenzo, Eros Fabrici
+ * @author Saverio Gianlorenzo
+ * @author Eros Fabrici
  */
 
 public class Inspector extends JavaService {
-        
+
         private static final class ProgramInfoType
 	{
 		private static final String PORT = "port";
@@ -130,7 +111,7 @@ public class Inspector extends JavaService {
 	private static final String TYPE_CARDINALITY_ZERO_TO_MANY = "*";
 	private static final String TAB = "\t";
 	private static final String NEW_LINE = "\n";
-	
+
 	@RequestResponse
 	public Value inspectProgram( Value request ) throws FaultException {
 		try {
@@ -144,13 +125,13 @@ public class Inspector extends JavaService {
 		} catch( CommandLineException | IOException | ParserException ex ) {
 			throw new FaultException( ex );
 		} catch ( SemanticException ex ){
-			throw new FaultException( 
+			throw new FaultException(
 				ex.getErrorList().stream().map( e -> e.getMessage() ).collect( Collectors.joining( "\n" ) )
-				, ex 
+				, ex
 			);
 		}
 	}
-	
+
 	@RequestResponse
 	public Value inspectTypes( Value request ) throws FaultException {
 		try {
@@ -159,13 +140,13 @@ public class Inspector extends JavaService {
 		} catch( CommandLineException | IOException | ParserException ex ) {
 			throw new FaultException( ex );
 		} catch ( SemanticException ex ){
-			throw new FaultException( 
+			throw new FaultException(
 				ex.getErrorList().stream().map( e -> e.getMessage() ).collect( Collectors.joining( "\n" ) )
-				, ex 
+				, ex
 			);
 		}
 	}
-	
+
 	private static ProgramInspector getInspector( String filename, String source ) throws CommandLineException, IOException, ParserException, SemanticException{
 		SemanticVerifier.Configuration configuration = new SemanticVerifier.Configuration();
 		configuration.setCheckForMain( false );
@@ -183,8 +164,8 @@ public class Inspector extends JavaService {
 		);
 		return ParsingUtils.createInspector( program );
 	}
-	
-		
+
+
 	private static ProgramInspector getInspector( String filename ) throws CommandLineException, IOException, ParserException, SemanticException{
 		SemanticVerifier.Configuration configuration = new SemanticVerifier.Configuration();
 		configuration.setCheckForMain( false );
@@ -202,14 +183,14 @@ public class Inspector extends JavaService {
 		);
 		return ParsingUtils.createInspector( program );
 	}
-	
+
 	private static Value buildProgramInfo( ProgramInspector inspector )
 	{
 
 		Value returnValue = Value.create();
 		ValueVector ports = ValueVector.create();
 		returnValue.children().put( ProgramInfoType.PORT, ports );
-                
+
 		for ( InputPortInfo portInfo : inspector.getInputPorts() ) {
 			ports.add( buildPortInfo( portInfo, inspector ) );
 		}
@@ -220,7 +201,7 @@ public class Inspector extends JavaService {
 
 		return returnValue;
 	}
-	
+
 	private static Value buildProgramTypeInfo( ProgramInspector inspector ){
 		Value returnValue = Value.create();
 		ValueVector types = ValueVector.create();
@@ -260,7 +241,7 @@ public class Inspector extends JavaService {
 
 		return returnValue;
 	}
-	
+
 	private static ArrayList<InterfaceDefinition> getAggregatedInterfaces( InputPortInfo portInfo, ProgramInspector inspector ){
 		ArrayList<InterfaceDefinition> returnList = new ArrayList<>();
 		for ( InputPortInfo.AggregationItemInfo aggregationItemInfo : portInfo.aggregationList() ) {
@@ -352,11 +333,11 @@ public class Inspector extends JavaService {
 		returnValue.getChildren( FaultInfoType.TYPE ).add( buildTypeInfo( fault.getValue(), true ) );
 		return returnValue;
 	}
-	
+
 	private static Value buildTypeInfo( TypeDefinition typeDefinition ){
 		return buildTypeInfo( typeDefinition, true );
 	}
-	
+
 	private static Value buildTypeInfo( TypeDefinition typeDefinition, boolean addCode )
 	{
 		Value returnValue = Value.create();
@@ -386,19 +367,19 @@ public class Inspector extends JavaService {
 		if ( typeDefinition.getDocumentation() != null ) {
 			returnValue.setFirstChild( TypeInfoType.DOCUMENTATION, typeDefinition.getDocumentation() );
 		}
-		
+
 		ValueVector subtypes = buildSubtypes( typeDefinition );
 		if( !subtypes.isEmpty() ){
 			returnValue.children().put( TypeInfoType.SUBTYPE, subtypes );
 		}
-		
+
 		if( addCode ){
 			returnValue.setFirstChild( TypeInfoType.CODE, buildTypeCode( typeDefinition ) );
 		}
-		
+
 		return returnValue;
 	}
-	
+
 	private static void setRootNativeTypeOrChoice( Value v, TypeDefinitionLink tdl ){
 		if( tdl.linkedType() instanceof TypeDefinitionLink ){
 			setRootNativeTypeOrChoice( v, ( TypeDefinitionLink ) tdl.linkedType() );
@@ -412,10 +393,10 @@ public class Inspector extends JavaService {
 			v.setFirstChild( TypeInfoType.ROOT_TYPE, tid.nativeType().id() );
 		}
 	}
-	
+
 	private static ValueVector buildSubtypes( TypeDefinition typeDefinition ){
 		ValueVector returnVector = ValueVector.create();
-		
+
 		if ( typeDefinition instanceof TypeChoiceDefinition ) {
 			returnVector.add( buildTypeInfo( ( (TypeChoiceDefinition) typeDefinition ).left(), false ) );
 			returnVector.get( returnVector.size() - 1 ).children().remove( TypeInfoType.NAME );
@@ -436,7 +417,7 @@ public class Inspector extends JavaService {
 	private static String buildTypeCode( TypeDefinition typeDefinition )
 	{
 		return TYPE_DECLARATION_TOKEN + " "
-			+ typeDefinition.id() + TYPE_DEFINITION_TOKEN + " " 
+			+ typeDefinition.id() + TYPE_DEFINITION_TOKEN + " "
 			+ buildSubTypeCode( typeDefinition );
 	}
 
@@ -540,7 +521,7 @@ public class Inspector extends JavaService {
 	private static void buildSubTypes( TypeDefinition d, ValueVector v, Set<String> s ){
 		buildSubTypes( d, v, s , false );
 	}
-		
+
 	private static void buildSubTypes( TypeDefinition d, ValueVector v, Set<String> s, boolean fromLinked ){
 		if ( d instanceof TypeDefinitionUndefined ){
 			buildSubTypes( ( TypeDefinitionUndefined ) d, v, s, fromLinked );
@@ -554,7 +535,7 @@ public class Inspector extends JavaService {
 	}
 
 	private static void buildSubTypes( TypeDefinitionUndefined d, ValueVector v, Set<String> s, boolean fromLinked ){}
-	
+
 	private static void buildSubTypes( TypeChoiceDefinition d, ValueVector v, Set<String> s , boolean fromLinked ){
 		buildSubTypes( d.left(), v, s, fromLinked );
 		buildSubTypes( d.right(), v, s, fromLinked );
@@ -564,7 +545,7 @@ public class Inspector extends JavaService {
 		if( !s.contains( d.linkedType().id() ) )
 			buildSubTypes( d.linkedType(), v, s, true );
 	}
-	
+
 	private static void buildSubTypes( TypeInlineDefinition d, ValueVector v, Set<String> s, boolean fromLinked )
 	{
 		if ( fromLinked && !s.contains( d.id() ) ) {
@@ -581,7 +562,7 @@ public class Inspector extends JavaService {
 		s.add( d.id() );
 		if ( d.hasSubTypes() ) {
 			d.subTypes().forEach( ( td ) -> {
-					buildSubTypes( td.getValue(), v, s ); 
+					buildSubTypes( td.getValue(), v, s );
 			} );
 		}
 	}

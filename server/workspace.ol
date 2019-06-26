@@ -3,7 +3,10 @@ include "ls_jolie.iol"
 include "string_utils.iol"
 include "runtime.iol"
 include "exec.iol"
-
+/*
+ * atom doesn't support workspace/ lsp messages so this is just a skeleton
+ * of the service
+ */
 execution{ concurrent }
 
 inputPort WorkspaceInput {

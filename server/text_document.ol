@@ -5,10 +5,22 @@ include "runtime.iol"
 include "exec.iol"
 include "file.iol"
 
+/*
+ * Service that handles all the textDocument/ messages sent from the client
+ */
 execution{ concurrent }
 
 constants {
-  INTEGER_MAX_VALUE = 2147483647
+  INTEGER_MAX_VALUE = 2147483647,
+  REQUEST_VAR = "requestVar",
+  RESPONSE_VAR = "responseVar",
+  NOTIFICATION = "notification",
+  NATIVE_TYPE_VOID = "void",
+  REQUEST_TYPE = "Request Type",
+  RESPONSE_TYPE = "Response Type",
+  HOVER_MARKUP_KIND_MARKWDOWN = "markdown",
+  HOVER_MARKUP_KIND_PLAIN = "plaintext"
+
 }
 /*
  * PORTS
@@ -28,9 +40,6 @@ outputPort Utils {
   Interfaces: UtilsInterface
 }
 
-embedded {
-  Jolie: "utils.ol"
-}
 
 /*
  * INIT and MAIN
@@ -46,16 +55,23 @@ main {
       println@Console( "didOpen received" )()
       insertNewDocument@Utils( notification )
       doc.path = notification.textDocument.uri
-      syntaxCheck@SyntaxChecker( doc )
+      //syntaxCheck@SyntaxChecker( doc )
   }
 
   /*
    * Message sent from the L.C. when saving a document
-   * Type: DidSaveTextDocumentParams
+   * Type: DidSaveTextDocumentParams, see types.iol
    */
   [ didChange( notification ) ] {
       println@Console( "didChange received " )()
-      updateDocument@Utils( notification )
+
+      docModifications << {
+        text = notification.contentChanges[0].text
+        version = notification.textDocument.version
+        uri = notification.textDocument.uri
+      }
+
+      updateDocument@Utils( docModifications )
   }
 
   [ willSave( notification ) ] {
@@ -65,42 +81,54 @@ main {
 
   /*
    * Messsage sent from the L.C. when saving a document
-   * Type: DidSaveTextDocumentParams
+   * Type: DidSaveTextDocumentParams, see types.iol
    */
   [ didSave( notification ) ] {
-      println@Console( "File changed " + notification.textDocument.uri )()
-      doc.path = notification.textDocument.uri
-      syntaxCheck@SyntaxChecker( doc )
+      println@Console( "didSave message received" )()
+      //didSave message contains only the version and the uri of the doc
+      //not the text! Therefore I get the document saved in the memory to get the text
+      //the text found will match the actual text just saved in the file as
+      //before this we surely received a didChange with the updated text
+      getDocument@Utils( notification.textDocument.uri )( textDocument )
+      docModifications << {
+        text = textDocument.source
+        version = notification.textDocument.version
+        uri = notification.textDocument.uri
+      }
+      updateDocument@Utils( docModifications )
+      //doc.path = notification.textDocument.uri
+      //syntaxCheck@SyntaxChecker( doc )
   }
 
   /*
    * Message sent from the L.C. when closing a doc
-   * Type: DidCloseTextDocumentParams
+   * Type: DidCloseTextDocumentParams, see types.iol
    */
   [ didClose( notification ) ] {
       println@Console( "didClose received" )()
       deleteDocument@Utils( notification )
+
   }
 
   /*
    * RR sent sent from the client when requesting a completion
-   * @Request: CompetionParams
-   * @Response: CompletionResult
+   * works for anything callable
+   * @Request: CompetionParams, see types.iol
+   * @Response: CompletionResult, see types.iol
    */
   [ completion( completionParams )( completionRes ) {
       println@Console( "Completion Req Received" )()
-      completionRes << {
-        isIncomplete = false
-      }
-      txtDocId -> completionParams.textDocument
+      completionRes.isIncomplete = false
+      txtDocUri -> completionParams.textDocument.uri
       position -> completionParams.position
 
       if ( is_defined( completionParams.context ) ) {
         context -> completionParams.context
       }
 
-      getDocument@Utils( txtDocId.uri )( document )
-
+      getDocument@Utils( txtDocUri )( document )
+      //character that triggered the completion (@)
+      //might be not defined
       triggerChar -> context.triggerCharacter
 
       program -> document.jolieProgram
@@ -121,7 +149,7 @@ main {
                   temp = op.name
                   temp.substring = operationNameTrimmed
                   contains@StringUtils( temp )( operationFound )
-
+                  undef( temp )
                   if ( operationFound ) {
                     snippet = op.name + "@" + port.name
                     label = snippet
@@ -131,16 +159,14 @@ main {
                 } else {
                   //@ triggered the completion
                   operationFound = ( op.name == operationNameTrimmed )
+
                   label = port.name
                   snippet = label
                   kind = 7
                 }
 
-              }
 
-                //if the operation was found or, the programmer
-                //made a mistaske while typing but we still found
-                //a match
+
                 if ( operationFound ) {
                   //build the rest of the snippet to be sent
                   if ( is_defined( op.responseType ) ) {
@@ -149,16 +175,16 @@ main {
                     if ( is_defined( op.requestType.name ) ) {
                       reqVar = op.requestType.name
                     } else {
-                      reqVar = "requestVar"
+                      reqVar = REQUEST_VAR
                     }
 
                     if ( is_defined( op.responseType.name ) ) {
                       resVar = op.responseType.name
-                      if ( resVar == "void" ) {
+                      if ( resVar == NATIVE_TYPE_VOID ) {
                         resVar = ""
                       }
                     } else {
-                      resVar = "responseVar"
+                      resVar = RESPONSE_VAR
                     }
                     snippet += "( ${1:" + reqVar + "} )( ${2:" + resVar + "} )"
                   } else {
@@ -166,7 +192,7 @@ main {
                     if ( is_defined( op.requestType.name ) ) {
                       notificationVar = op.requestType.name
                     } else {
-                      notificationVar = "notification"
+                      notificationVar = NOTIFICATION
                     }
 
                     snippet = "( ${1:" + notificationVar + "} )"
@@ -181,20 +207,24 @@ main {
                     insertText = snippet
                   }
                   completionRes.items[#completionRes.items] << completionItem
-
                 }
               }
             }
           }
         }
+      }
+
       if ( !foundPort ) {
         completionRes.items = void
       }
-      valueToPrettyString@StringUtils( completionRes )( s )
-      println@Console( s )(  )
       println@Console( "Sending completion Item to the client" )()
   } ]
 
+  /*
+   * RR sent sent from the client when requesting a hover
+   * @Request: TextDocumentPositionParams, see types.iol
+   * @Response: HoverResult, see types.iol
+   */
   [ hover( hoverReq )( hoverResp ) {
       hoverResp = void
       println@Console( "hover req received.." )()
@@ -204,12 +234,13 @@ main {
       line = document.lines[hoverReq.position.line]
       program -> document.jolieProgram
       trim@StringUtils( line )( trimmedLine )
+      //regex that identifies a message sending to a port
       trimmedLine.regex = "([A-z]+)@([A-z]+)\\(.*"
       //.group[1] is operaion name, .group[2] port name
       find@StringUtils( trimmedLine )( findRes )
       if ( findRes == 0 ) {
         trimmedLine.regex = "\\[? ?( ?[A-z]+ ?)\\( ?[A-z]* ?\\)\\(? ?[A-z]* ?\\)? ?\\]? ?\\{?"
-        //in this case, we have only
+        //in this case, we have only group[1] as op name
         find@StringUtils( trimmedLine )( findRes )
       }
 
@@ -220,6 +251,7 @@ main {
         operationName -> findRes.group[1]
         undef( trimmedLine.regex )
         hoverInfo = "```jolie\n" + operationName + "@"
+
         if ( is_defined( portName ) ) {
           hoverInfo += portName
         }
@@ -228,28 +260,36 @@ main {
 
           if ( is_defined( portName ) ) {
             ifGuard = port.name == portName && is_defined( port.interface )
-
           } else {
+            //we do not know the port name, so we search for each port we have
+            //in the program
             ifGuard = is_defined( port.interface )
           }
 
           if ( ifGuard ) {
+
             for ( iFace in port.interface ) {
               if ( is_defined( iFace.operation ) ) {
+
                 for ( op in iFace.operation ) {
                   if ( op.name == operationName ) {
+
                     if ( !is_defined( portName ) ) {
                       hoverInfo += port.name
                     }
+
                     reqType = op.requestType.name
                     reqTypeCode = op.requestType.code
-                    resType = ""
-                    resTypeCode = ""
+
                     if ( is_defined( op.responseType ) ) {
                       resType = op.responseType.name
                       resTypeCode = op.responseType.code
+                    } else {
+                      resType = ""
+                      resTypeCode = ""
                     }
                   }
+
                 }
               }
             }
@@ -263,14 +303,14 @@ main {
           hoverInfo += "( " + resType + " )"
         }
 
-        hoverInfo += "\n```\n*Request type*: \n" + reqTypeCode
+        hoverInfo += "\n```\n*" + REQUEST_TYPE + "*: \n" + reqTypeCode
         if ( resTypeCode != "" ) {
-          hoverInfo += "\n\n*Response type*: \n" + resTypeCode
+          hoverInfo += "\n\n*" + RESPONSE_TYPE + "*: \n" + resTypeCode
         }
 
         //setting the content of the response
         hoverResp.contents << {
-          kind = "markdown"
+          kind = HOVER_MARKUP_KIND_MARKWDOWN
           value = hoverInfo
         }
 
@@ -293,8 +333,83 @@ main {
   } ]
 
   [ signatureHelp( txtDocPositionParams )( signatureHelp ) {
+      //TODO, not finished, buggy, needs refactor
+      println@Console( "signatureHelp Message Received" )(  )
+      signatureHelp = void
       textDocUri -> txtDocPositionParams.textDocument.uri
       position -> txtDocPositionParams.position
+      getDocument@Utils( textDocUri )( document )
+      line = document.lines[position.line]
+      program -> document.jolieProgram
+      trim@StringUtils( line )( trimmedLine )
+      trimmedLine.regex = "([A-z]+)@([A-z]+)"
+      find@StringUtils( trimmedLine )( matchRes )
+      valueToPrettyString@StringUtils( matchRes )( s )
+      println@Console( s )(  )
 
-  } ]
+      if ( matchRes == 0 ) {
+        trimmedLine.regex = "\\[?([A-z]+)"
+        find@StringUtils( trimmedLine )( matchRes )
+        valueToPrettyString@StringUtils( matchRes )( s )
+        println@Console( s )(  )
+        if ( matchRes == 1 ) {
+          opName -> matchRes.group[1]
+          portName -> matchRes.group[2]
+
+          if ( is_defined( portName ) ) {
+            label = opName
+          } else {
+            label = opName + "@" + portName
+          }
+        }
+      } else {
+        opName -> matchRes.group[1]
+        portName -> matchRes.group[2]
+        label = opName + "@" + portName
+      }
+      // if we had a match
+      foundSomething = false
+      if ( matchRes == 1 ) {
+          for ( port in program ) {
+
+            if ( is_defined( portName ) ) {
+              ifGuard = ( port.name == portName ) && is_defined( port.interface )
+              foundSomething = true
+            } else {
+              ifGuard = is_defined( port.interface )
+            }
+
+            if ( ifGuard ) {
+              for ( iFace in port.interface ) {
+                if ( op.name == opName ) {
+                  foundSomething = true
+                  opRequestType = op.requestType.name
+
+                  if ( is_defined( op.responseType ) ) {
+                    opResponseType = op.responseType.name
+                  }
+
+
+                }
+              }
+            }
+          }
+
+          parametersLabel = opRequestType + " " + opResponseType
+          if ( foundSomething ) {
+            signatureHelp << {
+              signatures << {
+                label = label
+                parameters << {
+                  label = parametersLabel
+                }
+              }
+            }
+          }
+        }
+
+        valueToPrettyString@StringUtils( signatureHelp )( s )
+        println@Console( s )(  )
+
+      } ]
 }
