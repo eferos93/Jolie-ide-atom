@@ -2,7 +2,7 @@
 
 A language client plug-in for atom + the language server written in Jolie
 
-# Features so far working
+# Features working
 
 * Text Synchronization
 * Completion for operations/ports
@@ -15,7 +15,8 @@ A language client plug-in for atom + the language server written in Jolie
 # Installation
 
 Clone the repository inside your Atom's packages directory.
-Dependencies will be installed automatically when launching atom
+Dependencies will be installed automatically when launching atom, if not, open
+a terminal in the jolie-ide-atom directory and run *apm install*
 
 # Note:
 
