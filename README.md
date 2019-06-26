@@ -21,4 +21,4 @@ Dependencies will be installed automatically when launching atom
 
 * the socket is allocated statically by the client, check lib/main.js
 * tested only in Linux environment
-* Requires the last version of Jolie downloadable from the [Jolie rep](https://github.com/jolie/jolie)
+* Requires the last version of Jolie. Download and install at https://github.com/jolie/jolie
