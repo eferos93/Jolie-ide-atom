@@ -30,8 +30,8 @@ main {
       global.rootUri = initializeParams.rootUri
       global.clientCapabilities << initializeParams.capabilities
       //for full serverCapabilities spec, see
-      // https://microsoft.github.io/language-server-protocol/specification
-      // and types.iol
+      //https://microsoft.github.io/language-server-protocol/specification
+      //and types.iol
       serverCapabilities.capabilities << {
         textDocumentSync = global.textDocumentSync //0 = none, 1 = full, 2 = incremental
         completionProvider << {
@@ -64,14 +64,15 @@ main {
       println@Console( "Exiting Jolie Language server..." )()
       exit
     }
-    //received from syntax_checker.ol
+    //message received from the service utils.ol
     [ publishDiagnostics( diagnosticParams ) ] {
       println@Console( "publishing Diagnostics" )()
+      //sending the diagnostics to the client
       publishDiagnostics@Client( diagnosticParams )
     }
 
     [ cancelRequest( cancelReq ) ] {
         println@Console( "cancelRequest received ID: " + cancelReq.id )()
-        //TODO
+        //TODO using a courier
     }
 }

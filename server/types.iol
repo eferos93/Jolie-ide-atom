@@ -827,11 +827,8 @@ type InspectionRequest {
   source?: string
 }
 
-type Snippet: string {
-  prefix: string
-  body: string
-}
 
+//type that represent a text document saved in the server memory
 type TextDocument {
   uri: string
   lines*: string

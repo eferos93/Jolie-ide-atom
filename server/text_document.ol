@@ -95,8 +95,6 @@ main {
         uri = notification.textDocument.uri
       }
       updateDocument@Utils( docModifications )
-      //doc.path = notification.textDocument.uri
-      //syntaxCheck@SyntaxChecker( doc )
   }
 
   /*
@@ -150,20 +148,16 @@ main {
                   contains@StringUtils( temp )( operationFound )
                   undef( temp )
                   if ( operationFound ) {
-                    snippet = op.name + "@" + port.name
-                    label = snippet
+                    label = snippet = op.name + "@" + port.name
                     kind = 2 //method
                   }
 
                 } else {
                   //@ triggered the completion
                   operationFound = ( op.name == operationNameTrimmed )
-
-                  label = port.name
-                  snippet = label
+                  snippet = label = port.name
                   kind = 7
                 }
-
 
 
                 if ( operationFound ) {
@@ -277,12 +271,12 @@ main {
                       hoverInfo += port.name
                     }
 
-                    reqType = op.requestType.name
-                    reqTypeCode = op.requestType.code
+                    reqType -> op.requestType.name
+                    reqTypeCode -> op.requestType.code
 
                     if ( is_defined( op.responseType ) ) {
-                      resType = op.responseType.name
-                      resTypeCode = op.responseType.code
+                      resType -> op.responseType.name
+                      resTypeCode -> op.responseType.code
                     } else {
                       resType = ""
                       resTypeCode = ""
