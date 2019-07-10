@@ -1,26 +1,21 @@
+/*
+ * Main Service that communicates directly with the client and provides the basic
+ * operations
+  */
+execution { sequential }
+
+include "internal/deployment.iol"
+
 include "console.iol"
 include "string_utils.iol"
 include "runtime.iol"
 
-/*
- * Main Service that communicates directly with the client and provides the basic
- * operations
- * The port is defined in aliases.iol
- */
-execution { concurrent }
-
-include "aliases.iol"
-
-/*
- * @author Eros Fabrici
- */
 init {
   Client.location -> global.clientLocation
-  println@Console( "Jolie-IDE Server Started" )()
+  println@Console( "Jolie Language Server started" )()
   global.receivedShutdownReq = false
   //we want full document sync as we build the ProgramInspector for each
   //time we modify the document
-  global.textDocumentSync = 1
 }
 
 main {
@@ -30,26 +25,25 @@ main {
       global.rootUri = initializeParams.rootUri
       global.clientCapabilities << initializeParams.capabilities
       //for full serverCapabilities spec, see
-      //https://microsoft.github.io/language-server-protocol/specification
-      //and types.iol
+      // https://microsoft.github.io/language-server-protocol/specification
+      // and types.iol
       serverCapabilities.capabilities << {
-        textDocumentSync = global.textDocumentSync //0 = none, 1 = full, 2 = incremental
+        textDocumentSync = 1 //0 = none, 1 = full, 2 = incremental
         completionProvider << {
           resolveProvider = false
           triggerCharacters[0] = "@"
         }
         //signatureHelpProvider.triggerCharacters[0] = "("
-        definitionProvider = true
+        definitionProvider = false
         hoverProvider = true
-        documentSymbolProvider = true
+        documentSymbolProvider = false
         referenceProvider = false
         //experimental;
       }
-    }]
+    } ]
 
     [ initialized( initializedParams ) ] {
       println@Console( "Initialization done " )()
-
     }
 
     [ shutdown( req )( res ) {
@@ -64,15 +58,14 @@ main {
       println@Console( "Exiting Jolie Language server..." )()
       exit
     }
-    //message received from the service utils.ol
+    //received from syntax_checker.ol
     [ publishDiagnostics( diagnosticParams ) ] {
-      println@Console( "publishing Diagnostics" )()
-      //sending the diagnostics to the client
+      println@Console( "publishing diagnostics for " + diagnosticParams.uri )()
       publishDiagnostics@Client( diagnosticParams )
     }
 
     [ cancelRequest( cancelReq ) ] {
         println@Console( "cancelRequest received ID: " + cancelReq.id )()
-        //TODO using a courier
+        //TODO
     }
 }

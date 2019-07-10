@@ -1,11 +1,60 @@
 /*
- * all the types used in the Server
+ * Jolie types for the Language Server Protocol
  * see https://microsoft.github.io/language-server-protocol/specification
- * for more info
  */
- /*
-  * @author Eros Fabrici
-  */
+
+constants {
+	SymbolKind_File = 1,
+	SymbolKind_Module = 2,
+	SymbolKind_Namespace = 3,
+	SymbolKind_Package = 4,
+	SymbolKind_Class = 5,
+	SymbolKind_Method = 6,
+	SymbolKind_Property = 7,
+	SymbolKind_Field = 8,
+	SymbolKind_Constructor = 9,
+	SymbolKind_Enum = 10,
+	SymbolKind_Interface = 11,
+	SymbolKind_Function = 12,
+	SymbolKind_Variable = 13,
+	SymbolKind_Constant = 14,
+	SymbolKind_String = 15,
+	SymbolKind_Number = 16,
+	SymbolKind_Boolean = 17,
+	SymbolKind_Array = 18,
+}
+
+constants {
+	CompletionItemKind_Text = 1,
+	CompletionItemKind_Method = 2,
+	CompletionItemKind_Function = 3,
+	CompletionItemKind_Constructor = 4,
+	CompletionItemKind_Field = 5,
+	CompletionItemKind_Variable = 6,
+	CompletionItemKind_Class = 7,
+	CompletionItemKind_Interface = 8,
+	CompletionItemKind_Module = 9,
+	CompletionItemKind_Property = 10,
+	CompletionItemKind_Unit = 11,
+	CompletionItemKind_Value = 12,
+	CompletionItemKind_Enum = 13,
+	CompletionItemKind_Keyword = 14,
+	CompletionItemKind_Snippet = 15,
+	CompletionItemKind_Color = 16,
+	CompletionItemKind_File = 17,
+	CompletionItemKind_Reference = 18,
+	CompletionItemKind_Folder = 19,
+	CompletionItemKind_EnumMember = 20,
+	CompletionItemKind_Constant = 21,
+	CompletionItemKind_Struct = 22,
+	CompletionItemKind_Event = 23,
+	CompletionItemKind_Operator = 24,
+	CompletionItemKind_TypeParameter = 25
+}
+
+/*
+* @author Eros Fabrici
+*/
 type InitializeParams {
   processId: int | void
   rootPath?: string | void
@@ -100,7 +149,7 @@ type TextDocumentClientCapabilities {
   signatureHelp? {
     dynamicRegistration?: bool
     signatureInformation? {
-      documentFormat*: MarkupKind
+      documentationFormat*: MarkupKind
       parameterInformation? {
         labelOffsetSupport?: bool
       }
@@ -169,6 +218,9 @@ type TextDocumentClientCapabilities {
     dynamicRegistration?: bool
     rangeLimit?: int
     lineFoldingOnly?: bool
+  }
+  colorProvider? {
+    dynamicRegistration?: bool
   }
 }
 
@@ -674,7 +726,7 @@ type WorkspaceSymbolParams {
   query: string
 }
 
-type SymbolInformation | void {
+type SymbolInformation {
   /*
 	 * The name of this symbol
 	 */
@@ -709,6 +761,10 @@ type SymbolInformation | void {
 	containerName?: string
 }
 
+type DocumentSymbolResult {
+  _*: SymbolInformation
+}
+
 type Location {
   uri: DocumentUri
   range: Range
@@ -720,8 +776,6 @@ type ExecuteCommandParams {
 }
 
 type ExecuteCommandResult: undefined
-
-
 
 type Hover {
   contents[1,*]: MarkedString | MarkupContent
@@ -744,7 +798,7 @@ type DiagnosticParams {
 
 type EmptyDiagnosticParams {
   uri: DocumentUri
-  diagnostics: void
+  diagnostics*: void
 }
 
 type PublishDiagnosticParams: DiagnosticParams | EmptyDiagnosticParams
@@ -767,68 +821,11 @@ type DocumentSymbolParams {
   textDocument: TextDocumentIdentifier
 }
 
-type TypeInfoType {
-  rootType: string
-  name?: string
-  code?: string
-  isNative: bool
-  undefinedSubtypes?: bool
-  documentation?: string
-  subtype*: TypeInfoType
-} | void {
-  isChoice: bool
-  name?: string
-  code?: string
-  isNative: bool
-  undefinedSubtypes?: bool
-  documentation?: string
-  subtype*: TypeInfoType
+type Snippet: string {
+  prefix: string
+  body: string
 }
 
-type FaultInfoType {
-  name: string
-  faultType: TypeInfoType
-}
-
-type OperationInfoType {
-  name: string
-  requestType: TypeInfoType
-  responseType?: TypeInfoType
-  fault*: FaultInfoType
-  documentation?: string
-}
-
-type InterfaceInfoType{
-  name: string
-  operation*: OperationInfoType
-  documentation?: string
-}
-
-type PortInfoType{
-  name: string
-  location?: undefined //temporary fix: type should be string
-  protocol?: string
-  interface*: InterfaceInfoType
-  isOutput: bool
-  documentation?: string
-  subtype*: TypeInfoType
-}
-
-type ProgramInspectionResponse{
-  port*: PortInfoType
-}
-
-type TypesInspectionResponse{
-  type*: TypeInfoType
-}
-
-type InspectionRequest {
-  filename: string
-  source?: string
-}
-
-
-//type that represent a text document saved in the server memory
 type TextDocument {
   uri: string
   lines*: string

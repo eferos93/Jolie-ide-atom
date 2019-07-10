@@ -1,7 +1,8 @@
 include "console.iol"
-include "ls_jolie.iol"
 include "exec.iol"
 include "string_utils.iol"
+
+include "../interfaces/lsp.iol"
 
 constants {
   INTEGER_MAX_VALUE = 2147483647
@@ -18,9 +19,7 @@ outputPort Client {
   location: "local://Client"
   Interfaces: ServerToClient
 }
-/*
- * @author Eros Fabrici
- */
+
 main {
   [ syntaxCheck( document ) ] {
     println@Console( "syntaxChecker started for " + document.path )()

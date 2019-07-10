@@ -1,22 +1,16 @@
 include "console.iol"
-include "ls_jolie.iol"
 include "string_utils.iol"
 include "runtime.iol"
 include "exec.iol"
-/*
- * atom doesn't support workspace/ lsp messages so this is just a skeleton
- * of the service
- */
-execution{ concurrent }
+
+include "../interfaces/lsp.iol"
+
+execution { concurrent }
 
 inputPort WorkspaceInput {
   Location: "local"
   Interfaces: WorkspaceInterface
 }
-
-/*
- * @author Eros Fabrici
- */
  
 init {
   println@Console( "workspace running" )()

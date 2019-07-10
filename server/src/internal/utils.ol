@@ -1,13 +1,19 @@
 include "console.iol"
-include "ls_jolie.iol"
 include "string_utils.iol"
+include "runtime.iol"
+include "file.iol"
+
+include "../interfaces/lsp.iol"
+include "inspector.iol"
+
 /*
  * The main aim of this service is to keep saved
- * in global.textDocument all the documents open
+ * in global.textDocument all open documents
  * and keep them updated. The type of global.textDocument
- * is TextDocument and it is defined in types.iol
+ * is TextDocument and it is defined in types/lsp.iol
  */
-execution{ concurrent }
+
+execution { sequential }
 
 constants {
   INTEGER_MAX_VALUE = 2147483647
@@ -18,45 +24,42 @@ inputPort Utils {
   Interfaces: UtilsInterface
 }
 
-outputPort JavaServiceInspector {
-  Interfaces: InspectorInterface
-}
-
 outputPort Client {
   location: "local://Client"
   Interfaces: ServerToClient
 }
 
-embedded {
-  Java: "lspservices.Inspector" in JavaServiceInspector
-}
-
-/*
- * @author Eros Fabrici
- */
- 
 define inspect
 {
   scope( inspection ) {
     saveProgram = true
     install( default =>
-                stderr = inspection.default
+                stderr = inspection.(inspection.default)
                 stderr.regex =  "\\s*(.+):\\s*(\\d+):\\s*(error|warning)\\s*:\\s*(.+)"
+                valueToPrettyString@StringUtils( inspection )( ciao )
+                println@Console( ciao )()
+                // println@Console( stderr )()
+                // valueToPrettyString@StringUtils( inspection )( str )
+                // println@Console( str )(  )
                 find@StringUtils( stderr )( matchRes )
-                valueToPrettyString@StringUtils( matchRes )( str )
-                println@Console( str )(  )
-                //getting the uri of the document to be checked
+                // //getting the uri of the document to be checked
                 //have to do this because the inspector, when returning an error,
                 //returns an uri that looks the following:
                 // /home/eferos93/.atom/packages/Jolie-ide-atom/server/file:/home/eferos93/.atom/packages/Jolie-ide-atom/server/utils.ol
                 //same was with jolie --check
-                indexOfReq = matchRes.group[1]
-                indexOfReq.word = "file:"
-                indexOf@StringUtils( indexOfReq )( indexOfRes )
-                subStrReq = matchRes.group[1]
-                subStrReq.begin = indexOfRes + 5
-                length@StringUtils( matchRes.group[1] )( subStrReq.end )
-                substring@StringUtils( subStrReq )( documentUri )//line
+                if ( !(matchRes.group[1] instanceof string) ) {
+                  matchRes.group[1] = ""
+                }
+                indexOf@StringUtils( matchRes.group[1] {
+                  word = "file:"
+                } )( indexOfRes )
+                if ( indexOfRes > -1 ) {
+                  subStrReq = matchRes.group[1]
+                  subStrReq.begin = indexOfRes + 5
+                  // length@StringUtils( matchRes.group[1] )( subStrReq.end )
+                  substring@StringUtils( subStrReq )( documentUri ) //line
+                }
+
                 //line
                 l = int( matchRes.group[2] )
                 //severity
@@ -65,15 +68,17 @@ define inspect
                 //but this a problem of the jolie parser
                 if ( sev == "error" ) {
                   s = 1
+                } else {
+                  s = 1
                 }
 
                 diagnosticParams << {
-                  uri = documentUri
+                  uri = "file:" + documentUri
                   diagnostics << {
                     range << {
                       start << {
                         line = l-1
-                        character = INTEGER_MAX_VALUE
+                        character = 1
                       }
                       end << {
                         line = l-1
@@ -86,19 +91,40 @@ define inspect
                   }
                 }
                 publishDiagnostics@Client( diagnosticParams )
-
                 saveProgram = false
     )
 
+    // TODO : fix these:
+    // - remove the directories of this LSP
+    // - add the directory of the open file.
+    getenv@Runtime( "JOLIE_HOME" )( jHome )
+    getFileSeparator@File()( fs )
+
+    getParentPath@File( uri )( documentPath )
+    // indexOf@StringUtils( documentPath { word = "file:" } )( indexOfRes )
+    // if ( indexOfRes > -1 ) {
+    //   substring@StringUtils( documentPath { begin = indexOfRes + 5 } )( documentPath )
+    // }
     inspectionReq << {
       filename = uri
       source = docText
+      includePaths[0] = jHome + fs + "include"
+      includePaths[1] = documentPath
     }
-    inspectProgram@JavaServiceInspector( inspectionReq )( inspectionRes )
+    inspectPorts@Inspector( inspectionReq )( inspectionRes )
   }
-
 }
 
+define sendDiagnostics {
+  if ( saveProgram ) {
+    doc.jolieProgram << inspectionRes
+    diagnosticParams << {
+      uri = uri
+      diagnostics = void
+    }
+    publishDiagnostics@Client( diagnosticParams )
+  }
+}
 
 init {
   println@Console( "Utils Service started" )(  )
@@ -118,14 +144,7 @@ main {
 
       inspect
 
-      if ( saveProgram ) {
-        doc.jolieProgram << inspectionRes
-        diagnosticParams << {
-          uri = uri
-          diagnostics = void
-        }
-        publishDiagnostics@Client( diagnosticParams )
-      }
+      sendDiagnostics
 
       doc << {
         uri = uri
@@ -159,14 +178,7 @@ main {
 
         inspect
 
-        if ( saveProgram ) {
-          doc.jolieProgram << inspectionRes
-          diagnosticParams << {
-            uri = uri
-            diagnostics = void
-          }
-          publishDiagnostics@Client( diagnosticParams )
-        }
+        sendDiagnostics
 
         doc << {
           source = docText
@@ -177,14 +189,7 @@ main {
       } else {
         inspect
 
-        if ( saveProgram ) {
-          doc.jolieProgram << inspectionRes
-          diagnosticParams << {
-            uri = uri
-            diagnostics = void
-          }
-          publishDiagnostics@Client( diagnosticParams )
-        }
+        sendDiagnostics
       }
   }
 
@@ -214,7 +219,5 @@ main {
         //TODO if found == false throw exception
         println@Console( "doc not found!!!" )()
       }
-
-
   } ]
 }

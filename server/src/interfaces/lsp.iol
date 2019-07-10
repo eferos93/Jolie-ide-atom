@@ -1,8 +1,5 @@
-include "types.iol"
-include "types/JavaException.iol"
-/*
- * @author Eros Fabrici
- */
+include "types/lsp.iol"
+
 interface GeneralInterface {
   OneWay:
     initialized( InitializedParams ),
@@ -24,13 +21,8 @@ interface TextDocumentInterface {
     willSaveWaitUntil( WillSaveTextDocumentParams )( WillSaveWaitUntilResponse ),
     completion( CompletionParams )( CompletionResult ),
     hover( TextDocumentPositionParams )( HoverInformations ),
-    documentSymbol( DocumentSymbolParams )( undefined ),
+    documentSymbol( DocumentSymbolParams )( DocumentSymbolResult ),
     signatureHelp( TextDocumentPositionParams )( SignatureHelpResponse )
-}
-
-interface JavaServiceInterface {
-  RequestResponse:
-    documentSymbol( DocumentSymbolParams )( undefined ),
 }
 
 interface WorkspaceInterface {
@@ -39,7 +31,7 @@ interface WorkspaceInterface {
     didChangeWorkspaceFolders( DidChangeWorkspaceFoldersParams ),
     didChangeConfiguration( DidChangeConfigurationParams )
   RequestResponse:
-    documentSymbol( WorkspaceSymbolParams )( undefined ),
+    symbol( WorkspaceSymbolParams )( undefined ),
     executeCommand( ExecuteCommandParams )( ExecuteCommandResult )
 }
 
@@ -53,20 +45,6 @@ interface SyntaxCheckerInterface {
     syntaxCheck
 }
 
-interface InspectorInterface {
-  RequestResponse:
-  	inspectProgram( InspectionRequest )( ProgramInspectionResponse )
-      throws ParserException( WeakJavaExceptionType )
-             SemanticException( WeakJavaExceptionType )
-             FileNotFoundException( WeakJavaExceptionType )
-             IOException( WeakJavaExceptionType ),
-             inspectTypes( InspectionRequest )( TypesInspectionResponse )
-      throws ParserException( WeakJavaExceptionType )
-             SemanticException( WeakJavaExceptionType )
-             FileNotFoundException( WeakJavaExceptionType )
-             IOException( WeakJavaExceptionType )
-}
-
 interface UtilsInterface {
   RequestResponse:
     getDocument( string )( TextDocument )
@@ -74,5 +52,4 @@ interface UtilsInterface {
     insertNewDocument( DidOpenTextDocumentParams ),
     updateDocument( DocumentModifications ),
     deleteDocument( DidCloseTextDocumentParams )
-
 }

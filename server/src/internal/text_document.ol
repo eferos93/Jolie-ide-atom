@@ -1,9 +1,10 @@
 include "console.iol"
-include "ls_jolie.iol"
 include "string_utils.iol"
 include "runtime.iol"
 include "exec.iol"
 include "file.iol"
+
+include "../interfaces/lsp.iol"
 
 /*
  * Service that handles all the textDocument/ messages sent from the client
@@ -12,19 +13,14 @@ execution{ concurrent }
 
 constants {
   INTEGER_MAX_VALUE = 2147483647,
-  REQUEST_VAR = "requestVar",
-  RESPONSE_VAR = "responseVar",
   NOTIFICATION = "notification",
   NATIVE_TYPE_VOID = "void",
   REQUEST_TYPE = "Request Type",
   RESPONSE_TYPE = "Response Type",
   HOVER_MARKUP_KIND_MARKWDOWN = "markdown",
   HOVER_MARKUP_KIND_PLAIN = "plaintext"
-
 }
-/*
- * PORTS
- */
+
 inputPort TextDocumentInput {
   Location: "local"
   Interfaces: TextDocumentInterface
@@ -41,9 +37,6 @@ outputPort Utils {
 }
 
 
-/*
- * @author Eros Fabrici
- */
 init {
   println@Console( "txtDoc running" )()
 }
@@ -51,7 +44,7 @@ init {
 main {
 
   [ didOpen( notification ) ]  {
-      println@Console( "didOpen received" )()
+      println@Console( "didOpen received for " + notification.textDocument.uri )()
       insertNewDocument@Utils( notification )
       doc.path = notification.textDocument.uri
       //syntaxCheck@SyntaxChecker( doc )
@@ -95,6 +88,8 @@ main {
         uri = notification.textDocument.uri
       }
       updateDocument@Utils( docModifications )
+      //doc.path = notification.textDocument.uri
+      //syntaxCheck@SyntaxChecker( doc )
   }
 
   /*
@@ -110,8 +105,8 @@ main {
   /*
    * RR sent sent from the client when requesting a completion
    * works for anything callable
-   * @Request: CompetionParams, see types.iol
-   * @Response: CompletionResult, see types.iol
+   * @Request: CompletionParams, see types/lsp.iol
+   * @Response: CompletionResult, see types/lsp.iol
    */
   [ completion( completionParams )( completionRes ) {
       println@Console( "Completion Req Received" )()
@@ -120,88 +115,68 @@ main {
       position -> completionParams.position
 
       if ( is_defined( completionParams.context ) ) {
-        context -> completionParams.context
+        triggerChar -> completionParams.context.triggerCharacter
       }
 
       getDocument@Utils( txtDocUri )( document )
       //character that triggered the completion (@)
       //might be not defined
-      triggerChar -> context.triggerCharacter
 
       program -> document.jolieProgram
       operation = document.lines[position.line]
       trim@StringUtils( operation )( operationNameTrimmed )
       portFound = false
 
-      for ( port in program.port ) {
-
-        if ( port.isOutput && is_defined( port.interface ) ) {
-          for( iFace in port.interface ) {
-
-            if ( is_defined( iFace.operation ) ) {
-              for( op in iFace.operation ) {
-
-                if ( !is_defined( triggerChar ) ) {
-                  //was not '@' to trigger the completion
-                  temp = op.name
-                  temp.substring = operationNameTrimmed
-                  contains@StringUtils( temp )( operationFound )
-                  undef( temp )
-                  if ( operationFound ) {
-                    label = snippet = op.name + "@" + port.name
-                    kind = 2 //method
-                  }
-
-                } else {
-                  //@ triggered the completion
-                  operationFound = ( op.name == operationNameTrimmed )
-                  snippet = label = port.name
-                  kind = 7
-                }
-
-
-                if ( operationFound ) {
-                  //build the rest of the snippet to be sent
-                  if ( is_defined( op.responseType ) ) {
-                    //is a reqRes operation
-
-                    if ( is_defined( op.requestType.name ) ) {
-                      reqVar = op.requestType.name
-                    } else {
-                      reqVar = REQUEST_VAR
-                    }
-
-                    if ( is_defined( op.responseType.name ) ) {
-                      resVar = op.responseType.name
-                      if ( resVar == NATIVE_TYPE_VOID ) {
-                        resVar = ""
-                      }
-                    } else {
-                      resVar = RESPONSE_VAR
-                    }
-                    snippet += "( ${1:" + reqVar + "} )( ${2:" + resVar + "} )"
-                  } else {
-                    //is a OneWay operation
-                    if ( is_defined( op.requestType.name ) ) {
-                      notificationVar = op.requestType.name
-                    } else {
-                      notificationVar = NOTIFICATION
-                    }
-
-                    snippet = "( ${1:" + notificationVar + "} )"
-                  }
-
-                  //build the completionItem
-                  portFound = true
-                  completionItem << {
-                    label = label
-                    kind = kind
-                    insertTextFormat = 2
-                    insertText = snippet
-                  }
-                  completionRes.items[#completionRes.items] << completionItem
-                }
+      for ( port in program.outputPorts ) {
+        for( iFace in port.interfaces ) {
+          for( op in iFace.operations ) {
+            if ( !is_defined( triggerChar ) ) {
+              //was not '@' to trigger the completion
+              contains@StringUtils( op.name {
+                substring = operationNameTrimmed
+              } )( operationFound ) // TODO: fuzzy search
+              undef( temp )
+              if ( operationFound ) {
+                snippet = op.name + "@" + port.name
+                label = snippet
+                kind = CompletionItemKind_Method
               }
+            } else {
+              //@ triggered the completion
+              operationFound = ( op.name == operationNameTrimmed )
+
+              label = port.name
+              snippet = label
+              kind = CompletionItemKind_Class
+            }
+
+            if ( operationFound ) {
+              //build the rest of the snippet to be sent
+              if ( is_defined( op.responseType ) ) {
+                //is a reqRes operation
+                reqVar = op.requestType.name
+                
+                resVar = op.responseType.name
+                if ( resVar == NATIVE_TYPE_VOID ) {
+                  resVar = ""
+                }
+                snippet += "( ${1:" + reqVar + "} )( ${2:" + resVar + "} )"
+              } else {
+                //is a OneWay operation
+                notificationVar = op.requestType.name
+                
+                snippet = "( ${1:" + notificationVar + "} )"
+              }
+
+              //build the completionItem
+              portFound = true
+              completionItem << {
+                label = label
+                kind = kind
+                insertTextFormat = 2
+                insertText = snippet
+              }
+              completionRes.items[#completionRes.items] << completionItem
             }
           }
         }
@@ -219,91 +194,90 @@ main {
    * @Response: HoverResult, see types.iol
    */
   [ hover( hoverReq )( hoverResp ) {
-      hoverResp = void
-      println@Console( "hover req received.." )()
-      textDocUri -> hoverReq.textDocument.uri
-      getDocument@Utils( textDocUri )( document )
+    found = false
+    println@Console( "hover req received.." )()
+    textDocUri -> hoverReq.textDocument.uri
+    getDocument@Utils( textDocUri )( document )
 
-      line = document.lines[hoverReq.position.line]
-      program -> document.jolieProgram
-      trim@StringUtils( line )( trimmedLine )
-      //regex that identifies a message sending to a port
-      trimmedLine.regex = "([A-z]+)@([A-z]+)\\(.*"
-      //.group[1] is operaion name, .group[2] port name
+    line = document.lines[hoverReq.position.line]
+    program -> document.jolieProgram
+    trim@StringUtils( line )( trimmedLine )
+    //regex that identifies a message sending to a port
+    trimmedLine.regex = "([A-z]+)@([A-z]+)\\(.*"
+    //.group[1] is operaion name, .group[2] port name
+    find@StringUtils( trimmedLine )( findRes )
+    if ( findRes == 0 ) {
+      trimmedLine.regex = "\\[? ?( ?[A-z]+ ?)\\( ?[A-z]* ?\\)\\(? ?[A-z]* ?\\)? ?\\]? ?\\{?"
+      //in this case, we have only group[1] as op name
       find@StringUtils( trimmedLine )( findRes )
-      if ( findRes == 0 ) {
-        trimmedLine.regex = "\\[? ?( ?[A-z]+ ?)\\( ?[A-z]* ?\\)\\(? ?[A-z]* ?\\)? ?\\]? ?\\{?"
-        //in this case, we have only group[1] as op name
-        find@StringUtils( trimmedLine )( findRes )
+    }
+
+    //if we found somenthing, we have to send a hover item, otherwise void
+    if ( findRes == 1 ) {
+      // portName might NOT be defined
+      portName -> findRes.group[2]
+      operationName -> findRes.group[1]
+      undef( trimmedLine.regex )
+      hoverInfo = operationName
+
+      if ( is_defined( portName ) ) {
+        hoverInfo += "@" + portName
+        ports -> program.outputPorts
+      } else {
+        ports -> program.inputPorts
       }
 
-      //if we found somenthing, we have to send a hover item, otherwise void
-      if ( findRes == 1 ) {
-        // portName might NOT be defined
-        portName -> findRes.group[2]
-        operationName -> findRes.group[1]
-        undef( trimmedLine.regex )
-        hoverInfo = "```jolie\n" + operationName + "@"
-
+      for ( port in ports ) {
         if ( is_defined( portName ) ) {
-          hoverInfo += portName
+          ifGuard = port.name == portName && is_defined( port.interfaces )
+        } else {
+          //we do not know the port name, so we search for each port we have
+          //in the program
+          ifGuard = is_defined( port.interfaces )
         }
 
-        for ( port in program.port ) {
+        if ( ifGuard ) {
+          for ( iFace in port.interfaces ) {
+            for ( op in iFace.operations ) {
+              if ( op.name == operationName ) {
+                found = true
+                if ( !is_defined( portName ) ) {
+                  hoverInfo += port.name
+                }
 
-          if ( is_defined( portName ) ) {
-            ifGuard = port.name == portName && is_defined( port.interface )
-          } else {
-            //we do not know the port name, so we search for each port we have
-            //in the program
-            ifGuard = is_defined( port.interface )
-          }
+                reqType = op.requestType
+                // reqTypeCode = op.requestType.code
+                // reqTypeCode = resTypeCode = "" // TODO : pretty type description
 
-          if ( ifGuard ) {
-
-            for ( iFace in port.interface ) {
-              if ( is_defined( iFace.operation ) ) {
-
-                for ( op in iFace.operation ) {
-                  if ( op.name == operationName ) {
-
-                    if ( !is_defined( portName ) ) {
-                      hoverInfo += port.name
-                    }
-
-                    reqType -> op.requestType.name
-                    reqTypeCode -> op.requestType.code
-
-                    if ( is_defined( op.responseType ) ) {
-                      resType -> op.responseType.name
-                      resTypeCode -> op.responseType.code
-                    } else {
-                      resType = ""
-                      resTypeCode = ""
-                    }
-                  }
-
+                if ( is_defined( op.responseType ) ) {
+                  resType = op.responseType
+                  // resTypeCode = op.responseType.code
+                } else {
+                  resType = ""
+                  // resTypeCode = ""
                 }
               }
             }
           }
         }
+      }
 
-        hoverInfo += "( " + reqType + " )"
-        //build the info
-        if ( resType != "" ) {
-          //the operation is a RR
-          hoverInfo += "( " + resType + " )"
-        }
+      hoverInfo += "( " + reqType + " )"
+      //build the info
+      if ( resType != "" ) {
+        //the operation is a RR
+        hoverInfo += "( " + resType + " )"
+      }
 
-        hoverInfo += "\n```\n*" + REQUEST_TYPE + "*: \n" + reqTypeCode
-        if ( resTypeCode != "" ) {
-          hoverInfo += "\n\n*" + RESPONSE_TYPE + "*: \n" + resTypeCode
-        }
+      // hoverInfo += "\n```\n*" + REQUEST_TYPE + "*: \n" + reqTypeCode
+      // if ( resTypeCode != "" ) {
+      //   hoverInfo += "\n\n*" + RESPONSE_TYPE + "*: \n" + resTypeCode
+      // }
 
-        //setting the content of the response
+      //setting the content of the response
+      if ( found ) {
         hoverResp.contents << {
-          kind = HOVER_MARKUP_KIND_MARKWDOWN
+          language = "jolie"
           value = hoverInfo
         }
 
@@ -323,10 +297,11 @@ main {
           }
         }
       }
+    }
   } ]
 
   [ signatureHelp( txtDocPositionParams )( signatureHelp ) {
-      //TODO, not finished, buggy, needs refactor
+      // TODO, not finished, buggy, needs refactor
       println@Console( "signatureHelp Message Received" )(  )
       signatureHelp = void
       textDocUri -> txtDocPositionParams.textDocument.uri
@@ -401,8 +376,22 @@ main {
           }
         }
 
-        valueToPrettyString@StringUtils( signatureHelp )( s )
-        println@Console( s )(  )
-
+        // valueToPrettyString@StringUtils( signatureHelp )( s )
+        // println@Console( s )(  )
       } ]
+
+  [ documentSymbol( request )( response ) // {
+    // TODO: WIP
+    // getDocument@Utils( request.textDocument.uri )( document )
+    // i = 0
+    // symbolInfo -> response._[i]
+    // for( port in document.jolieProgram.outputPorts ) {
+    //   symbolInfo.name = port.name
+    //   symbol.detail = "outputPort"
+    //   symbol.kind = SymbolKind_Class
+    //   symbol.range 
+    //   i++
+    // }
+  // }
+  ]
 }
